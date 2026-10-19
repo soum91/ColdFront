@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ScenesRow: View {
     @EnvironmentObject var store: Store
@@ -45,6 +46,9 @@ struct ScenesRow: View {
                     Image(systemName: done == s.id ? "checkmark" : s.icon)
                 }
                 Text(s.name).fontWeight(.semibold)
+                if s.onArrive == true || s.onLeave == true {
+                    Image(systemName: "location.fill").font(.caption2).foregroundStyle(.secondary)
+                }
             }
             Text(s.summary).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
         }
@@ -70,6 +74,7 @@ struct SceneEditor: View {
     @EnvironmentObject var store: Store
     @Environment(\.dismiss) private var dismiss
     @State var scene: ACScene
+    @ObservedObject private var geo = Geo.shared
 
     private let icons = ["sparkles", "sofa", "moon.zzz", "bed.double", "sun.max", "snowflake", "flame",
                          "house", "figure.walk", "briefcase", "power", "leaf", "tv", "book"]
@@ -132,6 +137,22 @@ struct SceneEditor: View {
                     }
                 }
 
+                Section {
+                    Toggle("When I arrive home", isOn: Binding(
+                        get: { scene.onArrive == true },
+                        set: { scene.onArrive = $0 ? true : nil; if $0 { geo.requestAccess() } }))
+                    Toggle("When I leave home", isOn: Binding(
+                        get: { scene.onLeave == true },
+                        set: { scene.onLeave = $0 ? true : nil; if $0 { geo.requestAccess() } }))
+                    if scene.onArrive == true || scene.onLeave == true {
+                        HomeLocationRows()
+                    }
+                } header: {
+                    Text("Run automatically")
+                } footer: {
+                    Text("Uses iOS geofencing, so it fires even when Equinox is closed. Location access has to be Always. Time schedules can't be done inside an app on iOS: use Shortcuts → Automation → Time of Day → Run Immediately → Equinox \"Run Scene\".")
+                }
+
                 if store.scenes.contains(where: { $0.id == scene.id }) {
                     Section {
                         Button("Delete scene", role: .destructive) {
@@ -161,6 +182,50 @@ struct SceneEditor: View {
             Text("Don't change").tag(Bool?.none)
             Text("On").tag(Bool?.some(true))
             Text("Off").tag(Bool?.some(false))
+        }
+    }
+}
+
+struct HomeLocationRows: View {
+    @ObservedObject private var geo = Geo.shared
+    @State private var radius: Double = 300
+
+    var body: some View {
+        if geo.auth == .denied || geo.auth == .restricted || geo.auth == .authorizedWhenInUse {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(geo.auth == .authorizedWhenInUse
+                      ? "Location is \"While Using\". Set it to Always or triggers won't fire in the background."
+                      : "Location access is off for Equinox.", systemImage: "exclamationmark.triangle")
+                    .font(.footnote).foregroundStyle(.orange)
+                Button("Open Settings") {
+                    if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
+                }
+                .font(.footnote)
+            }
+        }
+        if let h = geo.home {
+            LabeledContent("Home", value: String(format: "%.4f, %.4f", h.lat, h.lon))
+                .font(.footnote)
+        }
+        Picker("Trigger distance", selection: Binding(
+            get: { geo.home?.radius ?? radius },
+            set: { radius = $0; geo.setRadius($0) })) {
+            Text("150 m").tag(150.0)
+            Text("300 m").tag(300.0)
+            Text("500 m").tag(500.0)
+            Text("1 km").tag(1000.0)
+            Text("2 km").tag(2000.0)
+        }
+        Button {
+            geo.setHomeHere(radius: geo.home?.radius ?? radius)
+        } label: {
+            HStack {
+                Text(geo.home == nil ? "Set home to where I am now" : "Reset home to where I am now")
+                if geo.locating { Spacer(); ProgressView() }
+            }
+        }
+        if let e = geo.lastEvent {
+            Text("Last trigger: \(e)").font(.caption).foregroundStyle(.secondary)
         }
     }
 }

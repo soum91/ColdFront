@@ -13,6 +13,12 @@ func scheduleBackgroundRefresh() {
 struct ColdFrontApp: App {
     @StateObject private var store = Store.shared
 
+    init() {
+        // Create the location manager at launch so iOS can deliver arrive/leave events
+        // when it relaunches Equinox in the background.
+        _ = Geo.shared
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

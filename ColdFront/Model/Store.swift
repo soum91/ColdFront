@@ -14,7 +14,10 @@ final class Store: ObservableObject {
         didSet { SmartAutoStore.save(smart) }
     }
     @Published var scenes: [ACScene] = ScenesStore.load() {
-        didSet { ScenesStore.save(scenes) }
+        didSet {
+            ScenesStore.save(scenes)
+            Geo.shared.sync()
+        }
     }
 
     private var client: ConnectLifeClient?

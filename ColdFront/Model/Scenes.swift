@@ -14,6 +14,8 @@ struct ACScene: Codable, Identifiable, Hashable {
     var sleep: Bool?
     var eco: Bool?
     var dimmer: Bool?
+    var onArrive: Bool?
+    var onLeave: Bool?
 
     var acMode: ACMode? { mode.flatMap(ACMode.init(rawValue:)) }
 

@@ -6,7 +6,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.10"
-    MARKETING_VERSION: "1.4.0"
+    MARKETING_VERSION: "1.5.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   ColdFront:
@@ -24,6 +24,8 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes: [fetch]
+        NSLocationWhenInUseUsageDescription: Equinox uses your location to run scenes when you arrive or leave home.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Equinox runs your arrive/leave home scenes in the background, even when the app is closed. Choose Always for that to work.
         NSBluetoothAlwaysUsageDescription: Equinox reads your Govee thermometer's broadcasts to get the room temperature and humidity.
         BGTaskSchedulerPermittedIdentifiers: [com.soum91.coldfront.refresh]
     settings:
