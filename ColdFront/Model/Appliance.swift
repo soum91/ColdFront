@@ -121,9 +121,12 @@ extension Appliance {
     var unitSymbol: String { fahrenheit ? "°F" : "°C" }
     var targetTemp: Int? { int(P.target) }
     var indoorTemp: Int? { int(P.indoor) }
+    /// Indoor humidity. 128 (or 0) means the unit has no sensor; some firmwares use other keys.
     var humidity: Int? {
-        guard let h = int(P.humidity), h > 0, h < 128 else { return nil }
-        return h
+        for key in [P.humidity, "f_humidity_in", "f_hum", "f_indoor_humidity"] {
+            if let h = int(key), h > 0, h < 100 { return h }
+        }
+        return nil
     }
     var tempRange: ClosedRange<Int> { fahrenheit ? 61...90 : 16...32 }
 

@@ -1,9 +1,11 @@
 import SwiftUI
+import UIKit
 
 struct ControlView: View {
     @EnvironmentObject var store: Store
     let id: String
     @State private var showEnergy = false
+    @State private var showRaw = false
 
     var body: some View {
         if let a = store.appliance(id) {
@@ -66,6 +68,7 @@ struct ControlView: View {
             }
             .refreshable { await store.refresh() }
         }
+        .sheet(isPresented: $showRaw) { RawStatusView(appliance: a) }
         .navigationTitle(a.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -80,6 +83,7 @@ struct ControlView: View {
                     if a.has(P.beep) {
                         Button(a.flag(P.beep) ? "Turn beep off" : "Turn beep on") { store.toggle(a, P.beep) }
                     }
+                    Button("Raw device data") { showRaw = true }
                     Text("Model \(a.typeCode)-\(a.featureCode)")
                 } label: { Image(systemName: "ellipsis.circle") }
             }
@@ -91,7 +95,9 @@ struct ControlView: View {
     private func roomStats(_ a: Appliance) -> some View {
         HStack(spacing: 12) {
             stat("Indoor", a.indoorTemp.map { "\($0)\(a.unitSymbol)" } ?? "--", "thermometer.medium")
-            stat("Humidity", a.humidity.map { "\($0)%" } ?? "--", "humidity")
+            if let h = a.humidity {
+                stat("Humidity", "\(h)%", "humidity")
+            }
             if let w = a.int(P.watts) {
                 stat("Power", "\(w) W", "bolt")
             }
@@ -281,5 +287,35 @@ struct EnergyPanel: View {
             return a.key < b.key
         }.map { ($0.key, $0.value) }
         loading = false
+    }
+}
+
+// MARK: - Raw status (diagnostics)
+
+struct RawStatusView: View {
+    let appliance: Appliance
+    @Environment(\.dismiss) private var dismiss
+
+    private var dump: String {
+        var lines = ["\(appliance.typeCode)-\(appliance.featureCode) \(appliance.featureName)"]
+        lines += appliance.status.keys.sorted().map { "\($0) = \(appliance.status[$0]!)" }
+        return lines.joined(separator: "\n")
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(appliance.status.keys.sorted(), id: \.self) { k in
+                LabeledContent(k, value: appliance.status[k] ?? "")
+                    .font(.system(.footnote, design: .monospaced))
+            }
+            .navigationTitle("Raw device data")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Copy all") { UIPasteboard.general.string = dump }
+                }
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+        }
     }
 }
