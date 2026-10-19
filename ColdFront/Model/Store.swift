@@ -79,9 +79,12 @@ final class Store: ObservableObject {
         appliances = fresh
         lastUpdated = Date()
         for a in fresh {
-            guard let s = smartAuto(a), let cmd = s.command(for: a, force: false) else { continue }
-            if cmd[P.mode] != nil { smart[a.id]?.lastSwitch = Date() }
-            try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
+            guard let st = smartAuto(a) else { continue }
+            let (cmd, next) = st.decide(for: a, userAction: false)
+            if next != st { smart[a.id] = next }
+            if !cmd.isEmpty {
+                try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
+            }
         }
     }
 
@@ -136,40 +139,48 @@ final class Store: ObservableObject {
     func enableSmartAuto(_ a: Appliance) {
         let seed = a.targetTemp.flatMap { a.mode.allowsTemperature ? $0 : nil }
             ?? (a.fahrenheit ? 72 : 22)
-        smart[a.id] = SmartAuto(enabled: true, setpoint: seed, fahrenheit: a.fahrenheit, lastSwitch: nil)
-        guard let i = appliances.firstIndex(where: { $0.id == a.id }) else { return }
-        var cur = appliances[i]
+        let keepBand = smart[a.id]?.band
+        smart[a.id] = SmartAuto(enabled: true, setpoint: seed, fahrenheit: a.fahrenheit, lastSwitch: nil, band: keepBand)
+        var cur = a
         cur.status[P.power] = "1"
-        let cmd = smart[a.id]!.command(for: cur, force: true) ?? [:]
-        dispatchSmart(a.id, cmd.merging([P.power: 1]) { $1 })
+        applySmart(cur, userAction: true, extra: a.isOn ? [:] : [P.power: 1])
     }
 
     func disableSmartAuto(_ id: String) {
         smart[id]?.enabled = false
     }
 
-    /// Called after every poll (and from background refresh).
+    /// Switch band (degrees past the setpoint before Auto flips mode), in the device's current unit.
+    func setBand(_ a: Appliance, _ b: Int) {
+        guard var s = smart[a.id] else { return }
+        let inSetpointUnit = s.fahrenheit == a.fahrenheit ? b
+            : (s.fahrenheit ? Int((Double(b) * 9 / 5).rounded()) : Int((Double(b) * 5 / 9).rounded()))
+        s.band = max(1, inSetpointUnit)
+        smart[a.id] = s
+    }
+
+    /// Called after every poll.
     func runSmartAuto() {
-        for a in appliances {
-            guard let s = smartAuto(a), let cmd = s.command(for: a, force: false) else { continue }
-            dispatchSmart(a.id, cmd)
+        for a in appliances where smartAuto(a) != nil {
+            applySmart(a, userAction: false)
         }
     }
 
-    private func dispatchSmart(_ id: String, _ cmd: [String: Int]) {
-        guard !cmd.isEmpty else { return }
-        if cmd[P.mode] != nil { smart[id]?.lastSwitch = Date() }
-        send(id, cmd)
+    private func applySmart(_ a: Appliance, userAction: Bool, extra: [String: Int] = [:]) {
+        guard let st = smartAuto(a) else { return }
+        let (props, next) = st.decide(for: a, userAction: userAction)
+        if next != st { smart[a.id] = next }
+        let cmd = props.merging(extra) { $1 }
+        if !cmd.isEmpty { send(a.id, cmd) }
     }
 
     // MARK: Convenience commands
 
     func setPower(_ a: Appliance, _ on: Bool) {
-        if on, let s = smartAuto(a) {
+        if on, smartAuto(a) != nil {
             var cur = a
             cur.status[P.power] = "1"
-            let cmd = s.command(for: cur, force: true) ?? [:]
-            dispatchSmart(a.id, cmd.merging([P.power: 1]) { $1 })
+            applySmart(cur, userAction: true, extra: [P.power: 1])
             return
         }
         var p = [P.power: on ? 1 : 0]
@@ -194,8 +205,7 @@ final class Store: ObservableObject {
             s.setpoint = clamped
             s.fahrenheit = a.fahrenheit
             smart[a.id] = s
-            // New setpoint may call for a different mode right away.
-            if let cmd = s.command(for: a, force: true) { dispatchSmart(a.id, cmd) }
+            applySmart(a, userAction: true)
             return
         }
         send(a.id, [P.target: clamped])

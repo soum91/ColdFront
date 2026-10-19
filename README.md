@@ -4,7 +4,7 @@ A clean, ad-free iOS controller for Hisense portable air conditioners (and other
 
 ## Features
 
-Power, mode (Cool / Dry / Fan, plus Heat on models that have it), a thermostat-style Auto that you set a temperature for and that flips the unit between Cool and Heat around it (Cool and Fan on cool-only units, with a 1°C / 2°F deadband and a 5 minute minimum between flips), a drag dial and +/- buttons for the setpoint, fan speed (Auto / Quiet / Low / Med / High), Eco, Sleep, Turbo, Silent and Swing toggles (only shown if your unit reports them), indoor temperature and humidity, live wattage, energy use for today / this week / this month, water-tank-full and filter alerts, and C/F switching. Status polls every 20 seconds while the app is in the foreground, and commands update the UI instantly with rollback if the server rejects them.
+Power, mode (Cool / Dry / Fan, plus Heat on models that have it), a thermostat-style Auto that you set a temperature for and that flips the unit between Cool and Heat around it (Cool and Fan on cool-only units). It switches only when the room is ±3°C / ±5°F off target (adjustable), the reading has held for 5 minutes, and the last flip was at least 30 minutes ago; it never re-sends a command, since every command makes the unit beep, a drag dial and +/- buttons for the setpoint, fan speed (Auto / Quiet / Low / Med / High), Eco, Sleep, Turbo, Silent and Swing toggles (only shown if your unit reports them), indoor temperature and humidity, live wattage, energy use for today / this week / this month, water-tank-full and filter alerts, and C/F switching. Status polls every 20 seconds while the app is in the foreground, and commands update the UI instantly with rollback if the server rejects them.
 
 ## Smart Auto limits
 

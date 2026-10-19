@@ -46,10 +46,15 @@ struct ControlView: View {
 
                     section("Mode") {
                         modeRow(a, accent)
-                        if store.smartAuto(a) != nil {
+                        if let sa = store.smartAuto(a) {
+                            let band = sa.band(for: a)
+                            Stepper(value: Binding(get: { band }, set: { store.setBand(a, $0) }),
+                                    in: (a.fahrenheit ? 2 : 1)...(a.fahrenheit ? 10 : 6)) {
+                                Text("Switch at ±\(band)\(a.unitSymbol)").font(.subheadline)
+                            }
                             Text(a.heatSupported
-                                 ? "Auto cools when the room is above your set temp and heats when it's below, like a home thermostat. Runs while ColdFront is open, plus occasional background checks."
-                                 : "Auto cools when the room is above your set temp and drops to fan when it's below. This unit has no heat mode. Runs while ColdFront is open, plus occasional background checks.")
+                                 ? "Cools once the room is \(band)° above your set temp, heats once it's \(band)° below. The unit's own thermostat handles everything in between. Mode changes need the reading to hold 5 min and stay at least 30 min apart."
+                                 : "Cools once the room is \(band)° above your set temp, drops to fan once it's \(band)° below (no heat on this unit). Mode changes need the reading to hold 5 min and stay at least 30 min apart.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
