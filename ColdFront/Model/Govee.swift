@@ -71,26 +71,59 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
     func centralManager(_ c: CBCentralManager, didDiscover p: CBPeripheral,
                         advertisementData ad: [String: Any], rssi: NSNumber) {
         let name = (ad[CBAdvertisementDataLocalNameKey] as? String) ?? p.name ?? ""
-        guard let mfr = ad[CBAdvertisementDataManufacturerDataKey] as? Data else { return }
-        let b = [UInt8](mfr)
-        let looksGovee = name.contains("H510") || name.contains("H5174") || name.contains("H5177") || name.hasPrefix("GVH")
-        // Company 0x0001, 6 data bytes (8 with the ID). Name check guards against random 0x0001 advertisers.
-        guard b.count == 8, b[0] == 0x01, b[1] == 0x00, looksGovee || readings[p.identifier.uuidString] != nil else { return }
+        let id = p.identifier.uuidString
+        let upper = name.uppercased()
+        let goveeName = upper.hasPrefix("GV") || upper.contains("GOVEE") || upper.hasPrefix("IHOME")
+            || ["H5072", "H5074", "H5075", "H5100", "H5101", "H5102", "H5103", "H5104", "H5105",
+                "H5108", "H5110", "H5174", "H5177", "H5179"].contains { upper.contains($0) }
 
-        let raw = (Int(b[4]) << 16) | (Int(b[5]) << 8) | Int(b[6])
+        guard let mfr = ad[CBAdvertisementDataManufacturerDataKey] as? Data, mfr.count >= 2 else {
+            if goveeName { noteRaw(id, name, "(no manufacturer data)", rssi) }
+            return
+        }
+        let b = [UInt8](mfr)
+        let company = Int(b[0]) | (Int(b[1]) << 8)
+        let payload = Array(b.dropFirst(2))
+        if company == 0x004C { return }  // Apple iBeacon frame, the same sensors alternate with it
+
+        if goveeName || company == 0xEC88 || company == 0x0001 {
+            noteRaw(id, name, b.map { String(format: "%02X", $0) }.joined(separator: " "), rssi)
+        }
+
+        // Same rules as the Home Assistant govee-ble parser:
+        //  H5072/H5075 (or company 0xEC88): 6 bytes, value in payload[1...4]
+        //  H5100-H5110/H5174/H5177/H5179 (any company ID): 6 or 8 bytes, value in payload[2...5]
+        var bytes: ArraySlice<UInt8>?
+        if payload.count == 6, upper.contains("H5072") || upper.contains("H5075") || company == 0xEC88 {
+            bytes = payload[1...4]
+        } else if payload.count == 6 || payload.count == 8, goveeName || company == 0x0001 {
+            bytes = payload[2...5]
+        }
+        guard let v4 = bytes.map({ Array($0) }), v4.count == 4 else { return }
+
+        let raw = (Int(v4[0]) << 16) | (Int(v4[1]) << 8) | Int(v4[2])
         let negative = raw & 0x800000 != 0
         let v = raw & 0x7FFFFF
         var temp = Double(v / 1000) / 10.0
         if negative { temp = -temp }
         let hum = Double(v % 1000) / 10.0
-        let err = b[7] & 0x80 != 0
+        let err = v4[3] & 0x80 != 0
         guard !err, temp > -40, temp < 70, hum >= 0, hum <= 100 else { return }
 
-        let id = p.identifier.uuidString
         if let old = readings[id], old.tempC == temp, old.humidity == hum,
            Date().timeIntervalSince(old.seen) < 15 { return }   // throttle UI churn
         let display = name.isEmpty ? "Govee sensor" : name.replacingOccurrences(of: "_", with: " ")
         readings[id] = Reading(id: id, name: display, tempC: temp, humidity: hum,
-                               battery: Int(b[7] & 0x7F), rssi: rssi.intValue, seen: Date())
+                               battery: Int(v4[3] & 0x7F), rssi: rssi.intValue, seen: Date())
+    }
+
+    // MARK: Debug: raw frames from anything Govee-looking, so unknown models can be mapped.
+
+    struct Raw: Identifiable { let id: String; var name: String; var hex: String; var rssi: Int }
+    @Published private(set) var raw: [String: Raw] = [:]
+
+    private func noteRaw(_ id: String, _ name: String, _ hex: String, _ rssi: NSNumber) {
+        if raw[id]?.hex == hex { return }
+        raw[id] = Raw(id: id, name: name.isEmpty ? "(no name)" : name, hex: hex, rssi: rssi.intValue)
     }
 }

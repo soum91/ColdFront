@@ -13,6 +13,9 @@ final class Store: ObservableObject {
     @Published var smart: [String: SmartAuto] = SmartAutoStore.load() {
         didSet { SmartAutoStore.save(smart) }
     }
+    @Published var scenes: [ACScene] = ScenesStore.load() {
+        didSet { ScenesStore.save(scenes) }
+    }
 
     private var client: ConnectLifeClient?
     private var pollTask: Task<Void, Never>?
@@ -67,6 +70,7 @@ final class Store: ObservableObject {
             lastUpdated = now
             error = nil
             runSmartAuto()
+            History.shared.record(self)
         } catch {
             self.error = error.localizedDescription
         }
@@ -78,6 +82,8 @@ final class Store: ObservableObject {
         guard let fresh = try? await client.appliances() else { return }
         appliances = fresh
         lastUpdated = Date()
+        History.shared.record(self)
+        defer { History.shared.save() }
         for a in fresh {
             guard let st = smartAuto(a) else { continue }
             let (cmd, next) = st.decide(for: a, room: roomTemp(a).value, userAction: false)
@@ -244,6 +250,86 @@ final class Store: ObservableObject {
         }
         send(a.id, p)
     }
+
+    // MARK: Scenes
+
+    /// Send and wait for the server to accept (used by scenes and Shortcuts, where the process may be suspended right after).
+    func commit(_ id: String, _ props: [String: Int]) async throws {
+        guard let client, let idx = appliances.firstIndex(where: { $0.id == id }) else {
+            throw ConnectLifeClient.ClientError.unexpected("Not signed in")
+        }
+        let before = appliances[idx]
+        for (k, v) in props { appliances[idx].status[k] = String(v) }
+        pendingUntil[id] = Date().addingTimeInterval(8)
+        do {
+            try await client.set(puid: before.puid, properties: props.mapValues(String.init))
+        } catch {
+            if let i = appliances.firstIndex(where: { $0.id == id }) { appliances[i] = before }
+            pendingUntil[id] = nil
+            self.error = error.localizedDescription
+            throw error
+        }
+    }
+
+    /// Apply a scene to every online AC on the account.
+    func runScene(_ scene: ACScene) async throws {
+        if appliances.isEmpty { await refresh() }
+        let targets = appliances.filter { $0.isAirConditioner && $0.online }
+        guard !targets.isEmpty else { throw ConnectLifeClient.ClientError.unexpected("No online air conditioner") }
+        for a in targets {
+            let props = sceneProps(scene, a)
+            if !props.isEmpty { try await commit(a.id, props) }
+        }
+    }
+
+    private func sceneProps(_ s: ACScene, _ a: Appliance) -> [String: Int] {
+        guard s.power else { return [P.power: 0] }
+        var p: [String: Int] = [P.power: 1]
+        let temp: Int? = s.temp.map { t in
+            let v = s.tempFahrenheit == a.fahrenheit ? t
+                : (a.fahrenheit ? Int((Double(t) * 9 / 5 + 32).rounded()) : Int(((Double(t) - 32) * 5 / 9).rounded()))
+            return min(max(v, a.tempRange.lowerBound), a.tempRange.upperBound)
+        }
+        var on = a
+        on.status[P.power] = "1"
+
+        func runSmart(_ st: SmartAuto) {
+            let (props, next) = st.decide(for: on, room: roomTemp(a).value, userAction: true)
+            smart[a.id] = next
+            p.merge(props) { $1 }
+        }
+
+        if let m = s.acMode {
+            if m == .auto {
+                var st = smart[a.id] ?? SmartAuto(enabled: true, setpoint: temp ?? a.targetTemp ?? (a.fahrenheit ? 72 : 22),
+                                                 fahrenheit: a.fahrenheit, lastSwitch: nil)
+                st.enabled = true
+                if let temp { st.setpoint = temp; st.fahrenheit = a.fahrenheit }
+                runSmart(st)
+            } else {
+                disableSmartAuto(a.id)
+                p[P.mode] = m.rawValue
+                if m.allowsTemperature, let t = temp ?? a.targetTemp { p[P.target] = t }
+            }
+        } else if var st = smartAuto(a) {
+            if let temp { st.setpoint = temp; st.fahrenheit = a.fahrenheit }
+            runSmart(st)
+        } else if let temp, a.mode.allowsTemperature {
+            p[P.target] = temp
+        }
+
+        if let f = s.fan { p[P.fan] = f }
+        for (key, value) in [(P.sleep, s.sleep), (P.eco, s.eco), (P.dimmer, s.dimmer)] {
+            if let v = value, a.has(key) { p[key] = v ? 1 : 0 }
+        }
+        return p
+    }
+
+    func saveScene(_ s: ACScene) {
+        if let i = scenes.firstIndex(where: { $0.id == s.id }) { scenes[i] = s } else { scenes.append(s) }
+    }
+
+    func deleteScene(_ s: ACScene) { scenes.removeAll { $0.id == s.id } }
 
     func energy(_ a: Appliance, stat: String) async -> (Double?, [String: Double]) {
         guard let client else { return (nil, [:]) }

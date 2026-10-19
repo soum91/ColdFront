@@ -61,6 +61,7 @@ struct ControlView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    section("Temperature history") { HistoryChart(appliance: a) }
                     section("Fan speed") { fanRow(a, accent) }
                     section("Functions") { functions(a, accent) }
                     section("Energy") { energy(a, accent) }
@@ -390,7 +391,24 @@ struct GoveePickerView: View {
                 } header: {
                     Text("Nearby sensors")
                 } footer: {
-                    Text("The Govee broadcasts its readings, so no pairing is needed and the Govee app can stay installed. It only updates while Equinox is open; in the background Auto falls back to the AC's own sensor.")
+                    Text("The Govee broadcasts its readings, so no pairing is needed. If it doesn't show up, force-quit the Govee app: while it's connected, the sensor may stop broadcasting. It only updates while Equinox is open; in the background Auto falls back to the AC's own sensor.")
+                }
+
+                let unparsed = govee.raw.values.filter { govee.readings[$0.id] == nil }.sorted { $0.rssi > $1.rssi }
+                if !unparsed.isEmpty {
+                    Section {
+                        ForEach(unparsed) { r in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(r.name) · signal \(r.rssi)")
+                                Text(r.hex).font(.system(.caption2, design: .monospaced)).foregroundStyle(.secondary)
+                                    .textSelection(.enabled)
+                            }
+                        }
+                    } header: {
+                        Text("Seen but not decoded")
+                    } footer: {
+                        Text("If your sensor shows up here instead of above, screenshot this and send it over.")
+                    }
                 }
 
                 if linked != nil {

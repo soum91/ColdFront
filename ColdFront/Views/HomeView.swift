@@ -26,6 +26,9 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
                         }
+                        if store.appliances.contains(where: \.isAirConditioner) {
+                            ScenesRow()
+                        }
                     }
                     .padding(20)
                 }
