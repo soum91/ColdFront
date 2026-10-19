@@ -42,7 +42,16 @@ struct ControlView: View {
 
                     powerButton(a, accent)
 
-                    section("Mode") { modeRow(a, accent) }
+                    section("Mode") {
+                        modeRow(a, accent)
+                        if store.smartAuto(a) != nil {
+                            Text(a.heatSupported
+                                 ? "Auto cools when the room is above your set temp and heats when it's below, like a home thermostat. Runs while ColdFront is open, plus occasional background checks."
+                                 : "Auto cools when the room is above your set temp and drops to fan when it's below. This unit has no heat mode. Runs while ColdFront is open, plus occasional background checks.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                     section("Fan speed") { fanRow(a, accent) }
                     section("Functions") { functions(a, accent) }
                     section("Energy") { energy(a, accent) }
@@ -125,7 +134,8 @@ struct ControlView: View {
     private func modeRow(_ a: Appliance, _ accent: Color) -> some View {
         HStack(spacing: 8) {
             ForEach(a.supportedModes) { m in
-                let selected = a.isOn && a.mode == m
+                let smartOn = store.smartAuto(a) != nil
+                let selected = a.isOn && (m == .auto ? smartOn : (!smartOn && a.mode == m))
                 Button { store.setMode(a, m) } label: {
                     VStack(spacing: 6) {
                         Image(systemName: m.symbol).font(.title3)

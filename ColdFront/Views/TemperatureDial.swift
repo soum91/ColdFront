@@ -11,8 +11,18 @@ struct TemperatureDial: View {
     private let size: CGFloat = 270
 
     private var range: ClosedRange<Int> { appliance.tempRange }
-    private var shown: Int { dragValue ?? appliance.targetTemp ?? range.lowerBound }
-    private var enabled: Bool { appliance.isOn && appliance.mode.allowsTemperature }
+    private var smart: SmartAuto? { store.smartAuto(appliance) }
+    private var shown: Int { dragValue ?? store.displayedTarget(appliance) ?? range.lowerBound }
+    private var enabled: Bool { appliance.isOn && (smart != nil || appliance.mode.allowsTemperature) }
+    private var modeLabel: String {
+        guard appliance.isOn else { return "OFF" }
+        guard smart != nil else { return appliance.mode.label.uppercased() }
+        switch appliance.mode {
+        case .cool: return "AUTO · COOLING"
+        case .heat: return "AUTO · HEATING"
+        default: return "AUTO · IDLE"
+        }
+    }
     private var fraction: Double {
         Double(shown - range.lowerBound) / Double(range.upperBound - range.lowerBound)
     }
@@ -28,7 +38,7 @@ struct TemperatureDial: View {
                 if enabled { knob }
 
                 VStack(spacing: 2) {
-                    Text(enabled ? appliance.mode.label.uppercased() : (appliance.isOn ? appliance.mode.label.uppercased() : "OFF"))
+                    Text(modeLabel)
                         .font(.caption.weight(.semibold))
                         .tracking(2)
                         .foregroundStyle(.secondary)
@@ -94,7 +104,7 @@ struct TemperatureDial: View {
                 dragValue = range.lowerBound + Int((deg / sweep * span).rounded())
             }
             .onEnded { _ in
-                if let v = dragValue, v != appliance.targetTemp {
+                if let v = dragValue, v != store.displayedTarget(appliance) {
                     store.setTemp(appliance, v)
                 }
                 // let the optimistic store value take over

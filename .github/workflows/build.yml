@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-15
@@ -42,3 +45,13 @@ jobs:
         with:
           name: ColdFront-ipa
           path: ColdFront.ipa
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: ColdFront build ${{ github.run_number }}
+          body: |
+            Unsigned IPA built from ${{ github.sha }}. Sideload with AltStore or Sideloadly.
+          files: ColdFront.ipa
+          make_latest: true

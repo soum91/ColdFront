@@ -3,11 +3,16 @@ import SwiftUI
 
 @MainActor
 final class Store: ObservableObject {
+    static let shared = Store()
+
     @Published var appliances: [Appliance] = []
     @Published var loggedIn = false
     @Published var busy = false
     @Published var error: String?
     @Published var lastUpdated: Date?
+    @Published var smart: [String: SmartAuto] = SmartAutoStore.load() {
+        didSet { SmartAutoStore.save(smart) }
+    }
 
     private var client: ConnectLifeClient?
     private var pollTask: Task<Void, Never>?
@@ -61,8 +66,22 @@ final class Store: ObservableObject {
             appliances = fresh
             lastUpdated = now
             error = nil
+            runSmartAuto()
         } catch {
             self.error = error.localizedDescription
+        }
+    }
+
+    /// Background app refresh: poll once and apply Smart Auto, awaiting the writes so iOS doesn't suspend us mid-request.
+    func backgroundTick() async {
+        guard let client else { return }
+        guard let fresh = try? await client.appliances() else { return }
+        appliances = fresh
+        lastUpdated = Date()
+        for a in fresh {
+            guard let s = smartAuto(a), let cmd = s.command(for: a, force: false) else { continue }
+            if cmd[P.mode] != nil { smart[a.id]?.lastSwitch = Date() }
+            try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
         }
     }
 
@@ -102,22 +121,84 @@ final class Store: ObservableObject {
         }
     }
 
+    // MARK: Smart Auto
+
+    func smartAuto(_ a: Appliance) -> SmartAuto? {
+        guard let s = smart[a.id], s.enabled else { return nil }
+        return s
+    }
+
+    /// Setpoint the dial should show: Smart Auto's own target when it's on, otherwise the unit's.
+    func displayedTarget(_ a: Appliance) -> Int? {
+        smartAuto(a)?.target(for: a) ?? a.targetTemp
+    }
+
+    func enableSmartAuto(_ a: Appliance) {
+        let seed = a.targetTemp.flatMap { a.mode.allowsTemperature ? $0 : nil }
+            ?? (a.fahrenheit ? 72 : 22)
+        smart[a.id] = SmartAuto(enabled: true, setpoint: seed, fahrenheit: a.fahrenheit, lastSwitch: nil)
+        guard let i = appliances.firstIndex(where: { $0.id == a.id }) else { return }
+        var cur = appliances[i]
+        cur.status[P.power] = "1"
+        let cmd = smart[a.id]!.command(for: cur, force: true) ?? [:]
+        dispatchSmart(a.id, cmd.merging([P.power: 1]) { $1 })
+    }
+
+    func disableSmartAuto(_ id: String) {
+        smart[id]?.enabled = false
+    }
+
+    /// Called after every poll (and from background refresh).
+    func runSmartAuto() {
+        for a in appliances {
+            guard let s = smartAuto(a), let cmd = s.command(for: a, force: false) else { continue }
+            dispatchSmart(a.id, cmd)
+        }
+    }
+
+    private func dispatchSmart(_ id: String, _ cmd: [String: Int]) {
+        guard !cmd.isEmpty else { return }
+        if cmd[P.mode] != nil { smart[id]?.lastSwitch = Date() }
+        send(id, cmd)
+    }
+
     // MARK: Convenience commands
 
     func setPower(_ a: Appliance, _ on: Bool) {
+        if on, let s = smartAuto(a) {
+            var cur = a
+            cur.status[P.power] = "1"
+            let cmd = s.command(for: cur, force: true) ?? [:]
+            dispatchSmart(a.id, cmd.merging([P.power: 1]) { $1 })
+            return
+        }
         var p = [P.power: on ? 1 : 0]
-        if on, let t = a.targetTemp { p[P.target] = t }
+        if on, a.mode.allowsTemperature, let t = a.targetTemp { p[P.target] = t }
         send(a.id, p)
     }
 
     func setMode(_ a: Appliance, _ m: ACMode) {
+        if m == .auto {
+            enableSmartAuto(a)
+            return
+        }
+        disableSmartAuto(a.id)
         var p = [P.power: 1, P.mode: m.rawValue]
         if m.allowsTemperature, let t = a.targetTemp { p[P.target] = t }
         send(a.id, p)
     }
 
     func setTemp(_ a: Appliance, _ t: Int) {
-        send(a.id, [P.target: min(max(t, a.tempRange.lowerBound), a.tempRange.upperBound)])
+        let clamped = min(max(t, a.tempRange.lowerBound), a.tempRange.upperBound)
+        if var s = smartAuto(a) {
+            s.setpoint = clamped
+            s.fahrenheit = a.fahrenheit
+            smart[a.id] = s
+            // New setpoint may call for a different mode right away.
+            if let cmd = s.command(for: a, force: true) { dispatchSmart(a.id, cmd) }
+            return
+        }
+        send(a.id, [P.target: clamped])
     }
 
     func setFan(_ a: Appliance, _ f: FanSpeed) { send(a.id, [P.fan: f.rawValue]) }
@@ -130,6 +211,13 @@ final class Store: ObservableObject {
         if let t = a.targetTemp {
             let converted = fahrenheit ? Int((Double(t) * 9 / 5 + 32).rounded()) : Int(((Double(t) - 32) * 5 / 9).rounded())
             p[P.target] = converted
+        }
+        if var s = smartAuto(a) {
+            var asDevice = a
+            asDevice.status[P.unit] = fahrenheit ? "1" : "0"
+            s.setpoint = s.target(for: asDevice)
+            s.fahrenheit = fahrenheit
+            smart[a.id] = s
         }
         send(a.id, p)
     }

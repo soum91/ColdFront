@@ -4,11 +4,15 @@ A clean, ad-free iOS controller for Hisense portable air conditioners (and other
 
 ## Features
 
-Power, mode (Cool / Dry / Fan / Auto, plus Heat on models that have it), a drag dial and +/- buttons for the setpoint, fan speed (Auto / Quiet / Low / Med / High), Eco, Sleep, Turbo, Silent and Swing toggles (only shown if your unit reports them), indoor temperature and humidity, live wattage, energy use for today / this week / this month, water-tank-full and filter alerts, and C/F switching. Status polls every 20 seconds while the app is in the foreground, and commands update the UI instantly with rollback if the server rejects them.
+Power, mode (Cool / Dry / Fan, plus Heat on models that have it), a thermostat-style Auto that you set a temperature for and that flips the unit between Cool and Heat around it (Cool and Fan on cool-only units, with a 1°C / 2°F deadband and a 5 minute minimum between flips), a drag dial and +/- buttons for the setpoint, fan speed (Auto / Quiet / Low / Med / High), Eco, Sleep, Turbo, Silent and Swing toggles (only shown if your unit reports them), indoor temperature and humidity, live wattage, energy use for today / this week / this month, water-tank-full and filter alerts, and C/F switching. Status polls every 20 seconds while the app is in the foreground, and commands update the UI instantly with rollback if the server rejects them.
+
+## Smart Auto limits
+
+The unit's own auto mode picks its own setpoint, so ColdFront's Auto replaces it with app-side logic. It runs every poll while the app is open and on iOS background refresh when it's closed, which iOS schedules on its own terms (often every 15 to 60+ minutes, less if you rarely open the app). For true 24/7 auto switching it has to run on something always on.
 
 ## Build
 
-No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront.ipa` artifact. Sideload it with AltStore or Sideloadly.
+No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront.ipa` and publishes it as a GitHub Release (latest is always at the top of the Releases page). Sideload it with AltStore or Sideloadly.
 
 Local build if you ever want it: `brew install xcodegen && xcodegen generate`, then open `ColdFront.xcodeproj`.
 

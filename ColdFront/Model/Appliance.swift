@@ -66,7 +66,8 @@ enum ACMode: Int, CaseIterable, Identifiable {
         case .auto: "a.circle"
         }
     }
-    var allowsTemperature: Bool { self == .cool || self == .heat || self == .auto }
+    /// The unit's native auto picks its own setpoint, so only cool and heat take a target.
+    var allowsTemperature: Bool { self == .cool || self == .heat }
 }
 
 enum FanSpeed: Int, CaseIterable, Identifiable {
@@ -127,9 +128,11 @@ extension Appliance {
     var tempRange: ClosedRange<Int> { fahrenheit ? 61...90 : 16...32 }
 
     /// Feature code 200 / 202 are cool-only units: no heat mode.
+    var heatSupported: Bool { !["200", "202"].contains(featureCode) }
+
+    /// Order shown in the mode row. `.auto` here means ColdFront's thermostat-style Smart Auto, not the unit's native auto.
     var supportedModes: [ACMode] {
-        let coolOnly = ["200", "202"].contains(featureCode)
-        return [.cool, .dry, .fan, .auto] + (coolOnly ? [] : [.heat])
+        [.auto, .cool] + (heatSupported ? [.heat] : []) + [.dry, .fan]
     }
 
     var alerts: [String] {

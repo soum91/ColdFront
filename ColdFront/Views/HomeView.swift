@@ -121,7 +121,11 @@ struct DeviceCard: View {
         if !a.online { return "Offline" }
         guard a.isAirConditioner else { return a.typeName }
         var parts: [String] = []
-        if a.isOn {
+        if a.isOn, let smart = store.smartAuto(a) {
+            let phase = a.mode == .cool ? "cooling" : (a.mode == .heat ? "heating" : "idle")
+            parts.append("Auto, \(phase)")
+            parts.append("Set \(smart.target(for: a))\(a.unitSymbol)")
+        } else if a.isOn {
             parts.append(a.mode.label)
             if a.mode.allowsTemperature, let t = a.targetTemp { parts.append("Set \(t)\(a.unitSymbol)") }
         } else {
