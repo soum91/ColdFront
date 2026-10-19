@@ -83,7 +83,14 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
         }
         let b = [UInt8](mfr)
         let company = Int(b[0]) | (Int(b[1]) << 8)
-        let payload = Array(b.dropFirst(2))
+        var payload = Array(b.dropFirst(2))
+        // iOS can hand over the Govee frame with the sensor's iBeacon frame glued on the end
+        // (4C 00 02 15 "INTELLI_ROCKS_HWP" ...). Cut it off, same as govee-ble does.
+        if payload.count > 8, let cut = (0..<(payload.count - 3)).first(where: {
+            payload[$0] == 0x4C && payload[$0 + 1] == 0x00 && payload[$0 + 2] == 0x02 && payload[$0 + 3] == 0x15
+        }) {
+            payload = Array(payload[..<cut])
+        }
         if company == 0x004C { return }  // Apple iBeacon frame, the same sensors alternate with it
 
         if goveeName || company == 0xEC88 || company == 0x0001 {
