@@ -6,7 +6,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.10"
-    MARKETING_VERSION: "1.2.0"
+    MARKETING_VERSION: "1.3.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   ColdFront:
@@ -24,6 +24,7 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes: [fetch]
+        NSBluetoothAlwaysUsageDescription: Equinox reads your Govee thermometer's broadcasts to get the room temperature and humidity.
         BGTaskSchedulerPermittedIdentifiers: [com.soum91.coldfront.refresh]
     settings:
       base:

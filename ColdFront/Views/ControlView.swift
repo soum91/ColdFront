@@ -6,6 +6,8 @@ struct ControlView: View {
     let id: String
     @State private var showEnergy = false
     @State private var showRaw = false
+    @State private var showGovee = false
+    @ObservedObject private var govee = Govee.shared
 
     var body: some View {
         if let a = store.appliance(id) {
@@ -74,6 +76,7 @@ struct ControlView: View {
             .refreshable { await store.refresh() }
         }
         .sheet(isPresented: $showRaw) { RawStatusView(appliance: a) }
+        .sheet(isPresented: $showGovee) { GoveePickerView(appliance: a) }
         .navigationTitle(a.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -98,24 +101,45 @@ struct ControlView: View {
     // MARK: Pieces
 
     private func roomStats(_ a: Appliance) -> some View {
-        HStack(spacing: 12) {
-            stat("Indoor", a.indoorTemp.map { "\($0)\(a.unitSymbol)" } ?? "--", "thermometer.medium")
-            if let h = a.humidity {
-                stat("Humidity", "\(h)%", "humidity")
+        let src = store.roomTemp(a).source
+        let autoOn = store.smartAuto(a) != nil
+        return HStack(spacing: 12) {
+            stat("AC sensor", a.indoorTemp.map { "\($0)\(a.unitSymbol)" } ?? "--", "air.conditioner.vertical",
+                 active: autoOn && src == .ac)
+            Button { showGovee = true } label: {
+                if let r = govee.reading(for: a.id) {
+                    let t = a.fahrenheit ? r.tempC * 9 / 5 + 32 : r.tempC
+                    stat(r.isFresh ? "Govee" : "Govee (stale)",
+                         String(format: "%.1f%@", t, a.unitSymbol),
+                         "thermometer.medium",
+                         sub: String(format: "%.0f%% humidity", r.humidity),
+                         active: autoOn && src == .govee)
+                } else {
+                    stat("Govee", "Add", "plus.circle")
+                }
             }
-            if let w = a.int(P.watts) {
+            .buttonStyle(.plain)
+            if let w = a.int(P.watts), w > 0 {
                 stat("Power", "\(w) W", "bolt")
             }
         }
     }
 
-    private func stat(_ title: String, _ value: String, _ icon: String) -> some View {
+    private func stat(_ title: String, _ value: String, _ icon: String,
+                      sub: String? = nil, active: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Label(title, systemImage: icon).font(.caption).foregroundStyle(.secondary)
             Text(value).font(.system(.title3, design: .rounded).weight(.semibold))
+            if let sub { Text(sub).font(.caption2).foregroundStyle(.secondary) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .card()
+        .overlay(alignment: .topTrailing) {
+            if active {
+                Text("AUTO").font(.system(size: 9, weight: .bold)).padding(.horizontal, 5).padding(.vertical, 2)
+                    .background(Color.white.opacity(0.15), in: Capsule()).padding(8)
+            }
+        }
     }
 
     private func powerButton(_ a: Appliance, _ accent: Color) -> some View {
@@ -322,6 +346,70 @@ struct RawStatusView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
+        }
+    }
+}
+
+// MARK: - Govee sensor picker
+
+struct GoveePickerView: View {
+    let appliance: Appliance
+    @ObservedObject private var govee = Govee.shared
+    @Environment(\.dismiss) private var dismiss
+
+    private var linked: String? { govee.links[appliance.id] }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    if govee.bluetoothOff {
+                        Label("Bluetooth is off or not allowed for Equinox.", systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(.orange)
+                    }
+                    let found = govee.readings.values.sorted { $0.rssi > $1.rssi }
+                    if found.isEmpty && !govee.bluetoothOff {
+                        HStack { ProgressView(); Text("Listening for Govee sensors…").foregroundStyle(.secondary) }
+                    }
+                    ForEach(found) { r in
+                        Button {
+                            govee.links[appliance.id] = r.id
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(r.name)
+                                    Text(String(format: "%.1f°C · %.0f%% · battery %d%% · signal %d", r.tempC, r.humidity, r.battery, r.rssi))
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if linked == r.id { Image(systemName: "checkmark").foregroundStyle(.tint) }
+                            }
+                        }
+                        .foregroundStyle(.primary)
+                    }
+                } header: {
+                    Text("Nearby sensors")
+                } footer: {
+                    Text("The Govee broadcasts its readings, so no pairing is needed and the Govee app can stay installed. It only updates while Equinox is open; in the background Auto falls back to the AC's own sensor.")
+                }
+
+                if linked != nil {
+                    Section {
+                        Toggle("Auto uses AC sensor only", isOn: Binding(
+                            get: { govee.acOnly[appliance.id] == true },
+                            set: { govee.acOnly[appliance.id] = $0 }))
+                        Button("Unlink sensor", role: .destructive) {
+                            govee.links[appliance.id] = nil
+                        }
+                    } footer: {
+                        Text("When on, the Govee is shown for comparison but Auto acts on the AC's reading.")
+                    }
+                }
+            }
+            .navigationTitle("Room sensor")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .onAppear { govee.start() }
         }
     }
 }

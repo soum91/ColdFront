@@ -42,8 +42,10 @@ struct RootView: View {
             guard store.loggedIn else { return }
             if p == .active {
                 store.startPolling()
+                if !Govee.shared.links.isEmpty { Govee.shared.start() }
             } else {
                 store.stopPolling()
+                Govee.shared.stop()
                 if p == .background, store.smart.values.contains(where: \.enabled) {
                     scheduleBackgroundRefresh()
                 }
@@ -54,6 +56,7 @@ struct RootView: View {
         }
         .task {
             if store.loggedIn { store.startPolling() }
+            if !Govee.shared.links.isEmpty { Govee.shared.start() }
         }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 /// 270° arc dial. Drag around the ring or tap -/+ to change the setpoint; sends on release.
 struct TemperatureDial: View {
     @EnvironmentObject var store: Store
+    @ObservedObject private var govee = Govee.shared
     let appliance: Appliance
     let accent: Color
 
@@ -50,8 +51,12 @@ struct TemperatureDial: View {
                             .font(.system(size: 22, weight: .light, design: .rounded))
                             .padding(.top, 14)
                     }
-                    if let i = appliance.indoorTemp {
-                        Text("Room \(i)\(appliance.unitSymbol)").font(.footnote).foregroundStyle(.secondary)
+                    let room = store.roomTemp(appliance)
+                    if let v = room.value {
+                        Text(room.source == .govee
+                             ? String(format: "Room %.1f%@ · Govee", v, appliance.unitSymbol)
+                             : "Room \(Int(v))\(appliance.unitSymbol)")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
             }

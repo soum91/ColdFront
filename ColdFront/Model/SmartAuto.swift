@@ -57,7 +57,7 @@ struct SmartAuto: Codable, Equatable {
     /// Work out what (if anything) to send. Returns the props plus the updated state to store.
     /// `userAction` is true when the person just tapped Auto, changed the setpoint or powered on:
     /// that bypasses the confirm/dwell timers, because they asked for it.
-    func decide(for a: Appliance, userAction: Bool, now: Date = Date()) -> (props: [String: Int], state: SmartAuto) {
+    func decide(for a: Appliance, room: Double?, userAction: Bool, now: Date = Date()) -> (props: [String: Int], state: SmartAuto) {
         var s = self
         guard enabled, a.online, a.isOn else { return ([:], s) }
 
@@ -69,13 +69,13 @@ struct SmartAuto: Codable, Equatable {
 
         // What the room is asking for.
         var wanted: ACMode = inSmartMode ? a.mode : .cool
-        if let room = a.indoorTemp {
-            if room >= set + band {
+        if let room {
+            if room >= Double(set + band) {
                 wanted = .cool
-            } else if room <= set - band {
+            } else if room <= Double(set - band) {
                 wanted = idleMode
             } else if !inSmartMode {
-                wanted = room >= set ? .cool : idleMode
+                wanted = room >= Double(set) ? .cool : idleMode
             }
         }
 

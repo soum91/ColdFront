@@ -80,7 +80,7 @@ final class Store: ObservableObject {
         lastUpdated = Date()
         for a in fresh {
             guard let st = smartAuto(a) else { continue }
-            let (cmd, next) = st.decide(for: a, userAction: false)
+            let (cmd, next) = st.decide(for: a, room: roomTemp(a).value, userAction: false)
             if next != st { smart[a.id] = next }
             if !cmd.isEmpty {
                 try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
@@ -126,6 +126,19 @@ final class Store: ObservableObject {
 
     // MARK: Smart Auto
 
+    enum RoomSource { case govee, ac, none }
+
+    /// Room temperature Auto should act on, in the device's unit: the linked Govee when its
+    /// reading is under 5 minutes old (and not switched off for this AC), otherwise the AC's own sensor.
+    func roomTemp(_ a: Appliance) -> (value: Double?, source: RoomSource) {
+        let g = Govee.shared
+        if g.acOnly[a.id] != true, let r = g.reading(for: a.id), r.isFresh {
+            return (a.fahrenheit ? r.tempC * 9 / 5 + 32 : r.tempC, .govee)
+        }
+        if let t = a.indoorTemp { return (Double(t), .ac) }
+        return (nil, .none)
+    }
+
     func smartAuto(_ a: Appliance) -> SmartAuto? {
         guard let s = smart[a.id], s.enabled else { return nil }
         return s
@@ -168,7 +181,7 @@ final class Store: ObservableObject {
 
     private func applySmart(_ a: Appliance, userAction: Bool, extra: [String: Int] = [:]) {
         guard let st = smartAuto(a) else { return }
-        let (props, next) = st.decide(for: a, userAction: userAction)
+        let (props, next) = st.decide(for: a, room: roomTemp(a).value, userAction: userAction)
         if next != st { smart[a.id] = next }
         let cmd = props.merging(extra) { $1 }
         if !cmd.isEmpty { send(a.id, cmd) }
