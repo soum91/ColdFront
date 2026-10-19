@@ -6,7 +6,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.10"
-    MARKETING_VERSION: "1.1.0"
+    MARKETING_VERSION: "1.2.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   ColdFront:
@@ -17,7 +17,7 @@ targets:
     info:
       path: ColdFront/Info.plist
       properties:
-        CFBundleDisplayName: ColdFront
+        CFBundleDisplayName: Equinox
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSceneManifest:

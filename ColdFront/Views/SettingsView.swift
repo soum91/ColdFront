@@ -24,7 +24,7 @@ struct SettingsView: View {
                     }
                 }
                 Section {
-                    Text("ColdFront talks to the same cloud service as the official ConnectLife app. Devices are added and Wi-Fi provisioned in the official app; this app handles day-to-day control. Status refreshes every 20 seconds while the app is open.")
+                    Text("Equinox talks to the same cloud service as the official ConnectLife app. Devices are added and Wi-Fi provisioned in the official app; this app handles day-to-day control. Status refreshes every 20 seconds while the app is open.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Text("Protocol research credit: oyvindwe/connectlife and bilan/connectlife-api-connector. Not affiliated with Hisense or ConnectLife.")
                         .font(.footnote).foregroundStyle(.secondary)

@@ -13,11 +13,13 @@ struct LoginView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     Spacer(minLength: 60)
-                    Image(systemName: "snowflake")
-                        .font(.system(size: 44, weight: .light))
-                        .foregroundStyle(Color(red: 0.3, green: 0.7, blue: 1))
+                    HStack(spacing: 10) {
+                        Image(systemName: "snowflake").foregroundStyle(Color(red: 0.3, green: 0.7, blue: 1))
+                        Image(systemName: "sun.max.fill").foregroundStyle(Color(red: 1, green: 0.55, blue: 0.25))
+                    }
+                    .font(.system(size: 40, weight: .light))
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("ColdFront").font(.system(size: 40, weight: .bold, design: .rounded))
+                        Text("Equinox").font(.system(size: 40, weight: .bold, design: .rounded))
                         Text("Sign in with your ConnectLife account to control your air conditioner.")
                             .foregroundStyle(.secondary)
                     }

@@ -1,4 +1,6 @@
-# ColdFront
+# Equinox
+
+(Repo and bundle ID still say ColdFront so installs update in place.)
 
 A clean, ad-free iOS controller for Hisense portable air conditioners (and other ConnectLife ACs). It uses the same cloud backend as the official ConnectLife app, so anything bound to your ConnectLife account shows up here.
 

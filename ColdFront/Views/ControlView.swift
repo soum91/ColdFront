@@ -190,7 +190,8 @@ struct ControlView: View {
             (P.sleep, "Sleep", "moon.zzz"),
             (P.turbo, "Turbo", "hare"),
             (P.mute, "Silent", "speaker.slash"),
-            (P.swing, "Swing", "arrow.up.and.down")
+            (P.swing, "Swing", "arrow.up.and.down"),
+            (P.dimmer, "Dimmer", "lightbulb.min")
         ].filter { a.has($0.0) }
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(items, id: \.0) { item in

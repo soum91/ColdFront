@@ -111,6 +111,7 @@ enum P {
     static let watts = "f_power_display"
     static let kwh = "f_power_consumption"
     static let beep = "t_beep"
+    static let dimmer = "t_dimmer"
 }
 
 extension Appliance {
