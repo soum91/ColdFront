@@ -50,6 +50,8 @@ jobs:
           PLIST=Payload/$APP.app/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
           VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")
+          # Sideloaders (FlareStore etc.) only compare the version string, so make it <version>.<build>.
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION.$BUILD" "$PLIST"
           IPA="$APP-$VERSION-build-$BUILD.ipa"
           zip -qr "$IPA" Payload
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
