@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.5.0.13",
+          "buildVersion": "13",
+          "date": "2026-10-20T20:20:30Z",
+          "localizedDescription": "- CI: version string carries the build number (<version>.<build>) (48e78ee)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-13/ColdFront-1.5.0-build-13.ipa",
+          "size": 598841,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.5.0",
           "buildVersion": "12",
           "date": "2026-10-20T18:49:48Z",
@@ -38,11 +47,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.5.0",
-      "versionDate": "2026-10-20T18:49:48Z",
-      "versionDescription": "- CI: publish an AltStore-format source for FlareStore / AltStore / SideStore (4f699f3)\n- Backfill script: repair mis-tagged releases [skip ci] (b0023eb)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-12/ColdFront-1.5.0-build-12.ipa",
-      "size": 598747,
+      "version": "1.5.0.13",
+      "versionDate": "2026-10-20T20:20:30Z",
+      "versionDescription": "- CI: version string carries the build number (<version>.<build>) (48e78ee)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-13/ColdFront-1.5.0-build-13.ipa",
+      "size": 598841,
       "appPermissions": {}
     }
   ],
