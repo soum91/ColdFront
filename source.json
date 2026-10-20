@@ -1,0 +1,41 @@
+{
+  "name": "Equinox (ColdFront) by soum91",
+  "identifier": "io.github.soum91.coldfront",
+  "subtitle": "Hisense portable AC controller",
+  "description": "ConnectLife-style controller for Hisense portable ACs with a thermostat-style Smart Auto, Govee room sensor support, scenes and geofenced arrive/leave triggers.",
+  "iconURL": "https://raw.githubusercontent.com/soum91/ColdFront/main/ColdFront/Assets.xcassets/AppIcon.appiconset/icon.png",
+  "website": "https://github.com/soum91/ColdFront",
+  "sourceURL": "https://raw.githubusercontent.com/soum91/ColdFront/source/source.json",
+  "tintColor": "0A84FF",
+  "apps": [
+    {
+      "name": "Equinox (ColdFront)",
+      "bundleIdentifier": "com.soum91.coldfront",
+      "developerName": "soum91",
+      "subtitle": "Hisense portable AC controller",
+      "localizedDescription": "ConnectLife-style controller for Hisense portable ACs with a thermostat-style Smart Auto, Govee room sensor support, scenes and geofenced arrive/leave triggers.",
+      "iconURL": "https://raw.githubusercontent.com/soum91/ColdFront/main/ColdFront/Assets.xcassets/AppIcon.appiconset/icon.png",
+      "tintColor": "0A84FF",
+      "category": "utilities",
+      "screenshotURLs": [],
+      "versions": [
+        {
+          "version": "1.5.0",
+          "buildVersion": "11",
+          "date": "2026-10-20T18:47:38Z",
+          "localizedDescription": "- Info.plist: take version and build number from MARKETING_VERSION / CURRENT_PROJECT_VERSION (d1cee67)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-11/ColdFront-1.5.0-build-11.ipa",
+          "size": 598847,
+          "minOSVersion": "17.0"
+        }
+      ],
+      "version": "1.5.0",
+      "versionDate": "2026-10-20T18:47:38Z",
+      "versionDescription": "- Info.plist: take version and build number from MARKETING_VERSION / CURRENT_PROJECT_VERSION (d1cee67)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-11/ColdFront-1.5.0-build-11.ipa",
+      "size": 598847,
+      "appPermissions": {}
+    }
+  ],
+  "news": []
+}
