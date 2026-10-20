@@ -14,7 +14,7 @@ The unit's own auto mode picks its own setpoint, so ColdFront's Auto replaces it
 
 ## Build
 
-No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront.ipa` and publishes it as a GitHub Release (latest is always at the top of the Releases page). Sideload it with AltStore or Sideloadly.
+No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront-<version>-build-<N>.ipa` and publishes it as a GitHub Release with a changelog of what changed since the previous build (latest is always at the top of the Releases page). Sideload it with AltStore or Sideloadly.
 
 Local build if you ever want it: `brew install xcodegen && xcodegen generate`, then open `ColdFront.xcodeproj`.
 
