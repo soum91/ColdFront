@@ -4,6 +4,8 @@ import UIKit
 struct ControlView: View {
     @EnvironmentObject var store: Store
     let id: String
+    var onSettings: (() -> Void)? = nil
+    @AppStorage("selectedDevice") private var selectedID = ""
     @State private var showEnergy = false
     @State private var showRaw = false
     @State private var showGovee = false
@@ -24,6 +26,7 @@ struct ControlView: View {
             Theme.background(accent).animation(.easeInOut(duration: 0.4), value: accent)
             ScrollView {
                 VStack(spacing: 18) {
+                    header(a)
                     roomStats(a)
 
                     ForEach(a.alerts, id: \.self) { alert in
@@ -79,10 +82,69 @@ struct ControlView: View {
         }
         .sheet(isPresented: $showRaw) { RawStatusView(appliance: a) }
         .sheet(isPresented: $showGovee) { GoveePickerView(appliance: a) }
-        .navigationTitle(a.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    // MARK: Header (Subwave-style: big name, live status, round buttons)
+
+    private func statusText(_ a: Appliance) -> (String, Color) {
+        if !a.online { return ("Offline", .red) }
+        if !a.isOn { return ("Off", Color(white: 0.55)) }
+        if let s = store.smartAuto(a) {
+            let phase = a.mode == .cool ? "cooling" : a.mode == .heat ? "heating" : "idle"
+            return ("Auto, \(phase) to \(s.target(for: a))\(a.unitSymbol)", Theme.accent(a))
+        }
+        var t = a.mode.label
+        if a.mode.allowsTemperature, let v = a.targetTemp { t += " to \(v)\(a.unitSymbol)" }
+        return (t, Theme.accent(a))
+    }
+
+    private func header(_ a: Appliance) -> some View {
+        let (status, color) = statusText(a)
+        let acs = store.appliances.filter(\.isAirConditioner)
+        return HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
+                if acs.count > 1 {
+                    Menu {
+                        ForEach(acs) { d in Button(d.name) { selectedID = d.id } }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(a.name).font(.system(size: 30, weight: .bold, design: .rounded))
+                            Image(systemName: "chevron.down").font(.headline)
+                        }
+                        .foregroundStyle(.primary)
+                    }
+                } else {
+                    Text(a.name).font(.system(size: 30, weight: .bold, design: .rounded))
+                        .lineLimit(2).minimumScaleFactor(0.7)
+                }
+                HStack(spacing: 6) {
+                    Circle().fill(color).frame(width: 8, height: 8)
+                    Text(status).foregroundStyle(.secondary)
+                }
+                .font(.subheadline)
+                if let room = a.room.isEmpty ? nil : a.room {
+                    Text(room).font(.caption).foregroundStyle(.tertiary)
+                }
+            }
+            Spacer()
+            HStack(spacing: 10) {
+                moreMenu(a)
+                if let onSettings {
+                    Button(action: onSettings) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .frame(width: 46, height: 46)
+                            .background(Color.white.opacity(0.08), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    private func moreMenu(_ a: Appliance) -> some View {
                 Menu {
                     Picker("Units", selection: Binding(
                         get: { a.fahrenheit },
@@ -95,9 +157,13 @@ struct ControlView: View {
                     }
                     Button("Raw device data") { showRaw = true }
                     Text("Model \(a.typeCode)-\(a.featureCode)")
-                } label: { Image(systemName: "ellipsis.circle") }
-            }
-        }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 46, height: 46)
+                        .background(Color.white.opacity(0.08), in: Circle())
+                        .foregroundStyle(.primary)
+                }
     }
 
     // MARK: Pieces

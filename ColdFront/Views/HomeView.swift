@@ -13,7 +13,7 @@ struct HomeView: View {
         NavigationStack {
             Group {
                 if let a = current {
-                    ControlView(id: a.id)
+                    ControlView(id: a.id, onSettings: { showSettings = true })
                         .id(a.id)
                 } else {
                     ZStack {
@@ -31,24 +31,9 @@ struct HomeView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { showSettings = true } label: { Image(systemName: "gearshape") }
-                }
-                if acs.count > 1 {
-                    ToolbarItem(placement: .principal) {
-                        Menu {
-                            ForEach(acs) { a in
-                                Button { selectedID = a.id } label: {
-                                    if a.id == current?.id { Label(a.name, systemImage: "checkmark") } else { Text(a.name) }
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(current?.name ?? "").font(.headline)
-                                Image(systemName: "chevron.down").font(.caption.weight(.bold))
-                            }
-                            .foregroundStyle(.primary)
-                        }
+                if current == nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showSettings = true } label: { Image(systemName: "gearshape") }
                     }
                 }
             }

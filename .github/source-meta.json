@@ -1,9 +1,9 @@
 {
-  "name": "Equinox (ColdFront)",
-  "sourceName": "Equinox (ColdFront) by soum91",
+  "name": "Equinox",
+  "sourceName": "Equinox by soum91",
   "sourceIdentifier": "io.github.soum91.coldfront",
   "subtitle": "Hisense portable AC controller",
-  "description": "ConnectLife-style controller for Hisense portable ACs with a thermostat-style Smart Auto, Govee room sensor support, scenes and geofenced arrive/leave triggers.",
+  "description": "Controller for Hisense portable ACs (ConnectLife) with a thermostat-style Auto, Govee room sensor, temperature history, scenes and arrive/leave triggers.",
   "developerName": "soum91",
   "iconURL": "https://raw.githubusercontent.com/soum91/ColdFront/main/ColdFront/Assets.xcassets/AppIcon.appiconset/icon.png",
   "tintColor": "0A84FF",
