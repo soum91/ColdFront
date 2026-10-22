@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.5.0.14",
+          "buildVersion": "14",
+          "date": "2026-10-22T01:03:36Z",
+          "localizedDescription": "- Open straight onto the AC control page (no device list); scenes live on the page (4fa47a2)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-14/ColdFront-1.5.0-build-14.ipa",
+          "size": 591754,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.5.0.13",
           "buildVersion": "13",
           "date": "2026-10-20T20:20:30Z",
@@ -47,11 +56,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.5.0.13",
-      "versionDate": "2026-10-20T20:20:30Z",
-      "versionDescription": "- CI: version string carries the build number (<version>.<build>) (48e78ee)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-13/ColdFront-1.5.0-build-13.ipa",
-      "size": 598841,
+      "version": "1.5.0.14",
+      "versionDate": "2026-10-22T01:03:36Z",
+      "versionDescription": "- Open straight onto the AC control page (no device list); scenes live on the page (4fa47a2)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-14/ColdFront-1.5.0-build-14.ipa",
+      "size": 591754,
       "appPermissions": {}
     }
   ],
