@@ -61,9 +61,10 @@ struct ControlView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    section("Temperature history") { HistoryChart(appliance: a) }
                     section("Fan speed") { fanRow(a, accent) }
+                    ScenesRow()
                     section("Functions") { functions(a, accent) }
+                    section("Temperature history") { HistoryChart(appliance: a) }
                     section("Energy") { energy(a, accent) }
 
                     if let e = store.error {

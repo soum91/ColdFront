@@ -1,68 +1,58 @@
 import SwiftUI
 
+/// Opens straight onto the AC's control page. With more than one AC, the title becomes a switcher.
 struct HomeView: View {
     @EnvironmentObject var store: Store
     @State private var showSettings = false
+    @AppStorage("selectedDevice") private var selectedID = ""
+
+    private var acs: [Appliance] { store.appliances.filter(\.isAirConditioner) }
+    private var current: Appliance? { acs.first { $0.id == selectedID } ?? acs.first }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Theme.background(Color(red: 0.3, green: 0.7, blue: 1))
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        header
-                        if let e = store.error {
-                            Label(e, systemImage: "exclamationmark.triangle.fill")
-                                .font(.footnote)
-                                .foregroundStyle(.orange)
-                                .card()
-                        }
-                        if store.appliances.isEmpty {
+            Group {
+                if let a = current {
+                    ControlView(id: a.id)
+                        .id(a.id)
+                } else {
+                    ZStack {
+                        Theme.background(Color(red: 0.3, green: 0.7, blue: 1))
+                        VStack(spacing: 14) {
+                            if let e = store.error {
+                                Label(e, systemImage: "exclamationmark.triangle.fill")
+                                    .font(.footnote).foregroundStyle(.orange).card()
+                            }
                             empty
                         }
-                        ForEach(store.appliances) { a in
-                            NavigationLink(value: a.id) {
-                                DeviceCard(appliance: a)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        if store.appliances.contains(where: \.isAirConditioner) {
-                            ScenesRow()
-                        }
+                        .padding(20)
                     }
-                    .padding(20)
+                    .refreshable { await store.refresh() }
                 }
-                .refreshable { await store.refresh() }
-            }
-            .navigationDestination(for: String.self) { id in
-                ControlView(id: id)
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
+                }
+                if acs.count > 1 {
+                    ToolbarItem(placement: .principal) {
+                        Menu {
+                            ForEach(acs) { a in
+                                Button { selectedID = a.id } label: {
+                                    if a.id == current?.id { Label(a.name, systemImage: "checkmark") } else { Text(a.name) }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(current?.name ?? "").font(.headline)
+                                Image(systemName: "chevron.down").font(.caption.weight(.bold))
+                            }
+                            .foregroundStyle(.primary)
+                        }
+                    }
                 }
             }
             .sheet(isPresented: $showSettings) { SettingsView() }
-        }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(greeting).font(.system(size: 30, weight: .bold, design: .rounded))
-            if let t = store.lastUpdated {
-                Text("Updated \(t.formatted(date: .omitted, time: .shortened))")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
-        }
-        .padding(.bottom, 6)
-    }
-
-    private var greeting: String {
-        let h = Calendar.current.component(.hour, from: Date())
-        switch h {
-        case 5..<12: return "Good morning"
-        case 12..<18: return "Good afternoon"
-        default: return "Good evening"
         }
     }
 
@@ -70,9 +60,10 @@ struct HomeView: View {
         VStack(spacing: 10) {
             if store.lastUpdated == nil {
                 ProgressView()
+                Text("Connecting to ConnectLife…").font(.footnote).foregroundStyle(.secondary)
             } else {
                 Image(systemName: "air.conditioner.horizontal").font(.largeTitle).foregroundStyle(.secondary)
-                Text("No devices on this account").font(.headline)
+                Text("No air conditioner on this account").font(.headline)
                 Text("Add the AC in the official app first. It shows up here once it's bound to your account.")
                     .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }
