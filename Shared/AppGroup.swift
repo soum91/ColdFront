@@ -1,5 +1,4 @@
 import Foundation
-import Security
 
 /// Files shared between the app and the widget through the App Group container.
 enum AppGroup {
@@ -47,21 +46,6 @@ enum AppGroup {
     /// App Group IDs from this bundle's embedded.mobileprovision and its executable's code signature.
     static func signedGroups() -> [String] {
         var out: [String] = []
-        // Ask iOS for this process's actual signed App Group entitlement. This works
-        // when a sideloader preserves sharing but rewrites the group name, even if
-        // its code signature stores entitlements as binary rather than XML.
-        if let task = SecTaskCreateFromSelf(nil),
-           let groups = SecTaskCopyValueForEntitlement(
-                task, "com.apple.security.application-groups" as CFString, nil
-           ) as? [String] {
-            for group in groups where group.hasPrefix("group.") && !out.contains(group) {
-                out.append(group)
-            }
-        }
-        if !out.isEmpty { return out }
-
-        // Fall back to reading a provisioning profile or embedded XML when the
-        // Security API cannot return entitlements (for example, preview builds).
         let bundle = Bundle.main
         var files: [URL] = []
         if let prov = bundle.url(forResource: "embedded", withExtension: "mobileprovision") { files.append(prov) }
