@@ -5,6 +5,7 @@ import AppIntents
 @main struct EquinoxWidgets: WidgetBundle {
     var body: some Widget {
         EquinoxRoomWidget()
+        EquinoxTemperatureWidget()
         if #available(iOS 18.0, *) { EquinoxPowerControl(); EquinoxActionControl() }
     }
 }
@@ -30,6 +31,60 @@ struct EquinoxRoomWidget: Widget {
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
+// A dedicated, read-only 1-slot Lock Screen temperature widget.
+// The existing Room & AC circle remains an interactive power switch.
+struct EquinoxTemperatureWidget: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: "EquinoxTemperature", intent: ACWidgetConfig.self, provider: ACProvider()) { entry in
+            EquinoxTemperatureView(entry: entry)
+                .containerBackground(for: .widget) { Color.clear }
+        }
+        .configurationDisplayName("Room temperature")
+        .description("Last reported temperature from your selected AC.")
+        .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+    }
+}
+
+struct EquinoxTemperatureView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: ACEntry
+
+    var body: some View {
+        let room = entry.state?.room.map {
+            String(format: "%.1f%@", $0, entry.state?.unit ?? "°C")
+        } ?? "--"
+
+        Group {
+            if family == .accessoryCircular {
+                ZStack {
+                    AccessoryWidgetBackground()
+                    VStack(spacing: 1) {
+                        Image(systemName: "thermometer.medium")
+                            .font(.system(size: 14, weight: .medium))
+                        Text(room)
+                            .font(.system(size: 11, weight: .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
+                }
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "thermometer.medium")
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(entry.state?.name ?? "Room")
+                            .font(.caption2)
+                            .lineLimit(1)
+                        Text(room)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                }
+            }
+        }
+    }
+}
+
 struct ACWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: ACEntry
