@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.18",
+          "buildVersion": "18",
+          "date": "2026-10-25T22:49:45Z",
+          "localizedDescription": "- Publish refreshed room temperature to widgets after background poll (18ca3dc)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-18/Equinox-1.6.0-build-18.ipa",
+          "size": 1071486,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.17",
           "buildVersion": "17",
           "date": "2026-10-25T18:04:22Z",
@@ -83,11 +92,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.17",
-      "versionDate": "2026-10-25T18:04:22Z",
-      "versionDescription": "- Add dedicated compact room-temperature Lock Screen widget (381633c)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-17/Equinox-1.6.0-build-17.ipa",
-      "size": 1070943,
+      "version": "1.6.0.18",
+      "versionDate": "2026-10-25T22:49:45Z",
+      "versionDescription": "- Publish refreshed room temperature to widgets after background poll (18ca3dc)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-18/Equinox-1.6.0-build-18.ipa",
+      "size": 1071486,
       "appPermissions": {}
     }
   ],
