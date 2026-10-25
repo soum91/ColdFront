@@ -14,11 +14,12 @@ struct ACEntry: TimelineEntry {
     var state: ACWidgetState?
     static func make(_ id: String?) -> ACEntry {
         let list = ACWidgetState.load()
-        return .init(date: .now, state: id == nil ? list.first : list.first { $0.id == id })
+        let state = id == nil ? list.first : (list.first { $0.id == id } ?? (list.count == 1 ? list.first : nil))
+        return .init(date: .now, state: state)
     }
 }
 struct ACProvider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> ACEntry { .init(date: .now, state: nil) }
+    func placeholder(in context: Context) -> ACEntry { .make(nil) }
     func snapshot(for configuration: ACWidgetConfig, in context: Context) async -> ACEntry { .make(configuration.device?.id) }
     func timeline(for configuration: ACWidgetConfig, in context: Context) async -> Timeline<ACEntry> {
         Timeline(entries: [.make(configuration.device?.id)], policy: .after(.now.addingTimeInterval(900)))
@@ -115,7 +116,7 @@ struct ACWidgetView: View {
     }
 }
 @available(iOS 18.0, *) struct ACControlProvider: AppIntentControlValueProvider {
-    func previewValue(configuration: ACControlConfig) -> ACEntry { .init(date: .now, state: nil) }
+    func previewValue(configuration: ACControlConfig) -> ACEntry { .make(configuration.device?.id) }
     func currentValue(configuration: ACControlConfig) async throws -> ACEntry { .make(configuration.device?.id) }
 }
 @available(iOS 18.0, *) struct EquinoxPowerControl: ControlWidget {
