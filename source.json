@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.16",
+          "buildVersion": "16",
+          "date": "2026-10-25T13:22:00Z",
+          "localizedDescription": "- Add Equinox AC controls and room-temperature Lock Screen widgets (a3df0ab)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-16/Equinox-1.6.0-build-16.ipa",
+          "size": 1061710,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.15",
           "buildVersion": "15",
           "date": "2026-10-22T02:00:56Z",
@@ -65,11 +74,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.15",
-      "versionDate": "2026-10-22T02:00:56Z",
-      "versionDescription": "- Subwave-style control page header, new Equinox icon, release and source renamed to Equinox (69614dc)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-15/Equinox-1.6.0-build-15.ipa",
-      "size": 890845,
+      "version": "1.6.0.16",
+      "versionDate": "2026-10-25T13:22:00Z",
+      "versionDescription": "- Add Equinox AC controls and room-temperature Lock Screen widgets (a3df0ab)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-16/Equinox-1.6.0-build-16.ipa",
+      "size": 1061710,
       "appPermissions": {}
     }
   ],
