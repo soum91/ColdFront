@@ -34,14 +34,27 @@ struct EquinoxRoomWidget: Widget {
 }
 // A dedicated, read-only 1-slot Lock Screen temperature widget.
 // The existing Room & AC circle remains an interactive power switch.
+// The single-slot temperature display has no required configuration.
+// Use the same static timeline approach as the working DewPoint temperature widget;
+// this also gives an unconfigured widget a real rendered view.
+struct ACStaticProvider: TimelineProvider {
+    func placeholder(in context: Context) -> ACEntry { .make(nil) }
+    func getSnapshot(in context: Context, completion: @escaping (ACEntry) -> Void) {
+        completion(.make(nil))
+    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<ACEntry>) -> Void) {
+        completion(Timeline(entries: [.make(nil)], policy: .after(.now.addingTimeInterval(900))))
+    }
+}
+
 struct EquinoxTemperatureWidget: Widget {
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: "EquinoxTemperature", intent: ACWidgetConfig.self, provider: ACProvider()) { entry in
+        StaticConfiguration(kind: "EquinoxTemperatureStatic", provider: ACStaticProvider()) { entry in
             EquinoxTemperatureView(entry: entry)
                 .containerBackground(for: .widget) { Color.clear }
         }
         .configurationDisplayName("Room temperature")
-        .description("Last reported temperature from your selected AC.")
+        .description("Latest room temperature from Equinox. Opens without choosing an AC.")
         .supportedFamilies([.accessoryCircular, .accessoryRectangular])
     }
 }
@@ -112,7 +125,20 @@ struct ACWidgetView: View {
                     }
                 }
             }
-        } else { Label("Open Equinox to load your AC", systemImage: "snowflake").font(.caption) }
+        } else if family == .accessoryCircular {
+            ZStack {
+                AccessoryWidgetBackground()
+                VStack(spacing: 1) {
+                    Image(systemName: "thermometer.medium")
+                    Text("--").font(.caption.bold())
+                }
+            }
+        } else if family == .accessoryInline {
+            Label("AC --", systemImage: "thermometer.medium")
+        } else {
+            Label("Open Equinox to load your AC", systemImage: "thermometer.medium")
+                .font(.caption)
+        }
     }
 }
 @available(iOS 18.0, *) struct ACControlProvider: AppIntentControlValueProvider {
