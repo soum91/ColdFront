@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.17",
+          "buildVersion": "17",
+          "date": "2026-10-25T18:04:22Z",
+          "localizedDescription": "- Add dedicated compact room-temperature Lock Screen widget (381633c)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-17/Equinox-1.6.0-build-17.ipa",
+          "size": 1070943,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.16",
           "buildVersion": "16",
           "date": "2026-10-25T13:22:00Z",
@@ -74,11 +83,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.16",
-      "versionDate": "2026-10-25T13:22:00Z",
-      "versionDescription": "- Add Equinox AC controls and room-temperature Lock Screen widgets (a3df0ab)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-16/Equinox-1.6.0-build-16.ipa",
-      "size": 1061710,
+      "version": "1.6.0.17",
+      "versionDate": "2026-10-25T18:04:22Z",
+      "versionDescription": "- Add dedicated compact room-temperature Lock Screen widget (381633c)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-17/Equinox-1.6.0-build-17.ipa",
+      "size": 1070943,
       "appPermissions": {}
     }
   ],
