@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.20",
+          "buildVersion": "20",
+          "date": "2026-10-25T23:52:59Z",
+          "localizedDescription": "- Fix blank Equinox lock screen temperature and empty-state icon (76bfee7)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-20/Equinox-1.6.0-build-20.ipa",
+          "size": 1074887,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.19",
           "buildVersion": "19",
           "date": "2026-10-25T22:49:57Z",
@@ -101,11 +110,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.19",
-      "versionDate": "2026-10-25T22:49:57Z",
-      "versionDescription": "- Use cached temperature readings in widget previews (efd42ff)\n- Publish refreshed room temperature to widgets after background poll (18ca3dc)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-19/Equinox-1.6.0-build-19.ipa",
-      "size": 1071719,
+      "version": "1.6.0.20",
+      "versionDate": "2026-10-25T23:52:59Z",
+      "versionDescription": "- Fix blank Equinox lock screen temperature and empty-state icon (76bfee7)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-20/Equinox-1.6.0-build-20.ipa",
+      "size": 1074887,
       "appPermissions": {}
     }
   ],
