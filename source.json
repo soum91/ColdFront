@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.22",
+          "buildVersion": "22",
+          "date": "2026-10-25T23:55:33Z",
+          "localizedDescription": "- Restore iOS-compatible App Group discovery; retain lock screen fix (e2ca431)\n- Resolve preserved sideload App Groups from actual signed entitlements (e6af5fb)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-22/Equinox-1.6.0-build-22.ipa",
+          "size": 1074746,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.20",
           "buildVersion": "20",
           "date": "2026-10-25T23:52:59Z",
@@ -110,11 +119,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.20",
-      "versionDate": "2026-10-25T23:52:59Z",
-      "versionDescription": "- Fix blank Equinox lock screen temperature and empty-state icon (76bfee7)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-20/Equinox-1.6.0-build-20.ipa",
-      "size": 1074887,
+      "version": "1.6.0.22",
+      "versionDate": "2026-10-25T23:55:33Z",
+      "versionDescription": "- Restore iOS-compatible App Group discovery; retain lock screen fix (e2ca431)\n- Resolve preserved sideload App Groups from actual signed entitlements (e6af5fb)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-22/Equinox-1.6.0-build-22.ipa",
+      "size": 1074746,
       "appPermissions": {}
     }
   ],
