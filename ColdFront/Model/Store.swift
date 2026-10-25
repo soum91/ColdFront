@@ -97,6 +97,8 @@ final class Store: ObservableObject {
                 try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
             }
         }
+        // Background refresh must publish the new room reading, too.
+        publishWidgetState()
     }
 
     func startPolling(every seconds: Double = 20) {
