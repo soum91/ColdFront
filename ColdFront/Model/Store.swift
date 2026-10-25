@@ -55,6 +55,7 @@ final class Store: ObservableObject {
         client = nil
         appliances = []
         loggedIn = false
+        publishWidgetState()
     }
 
     func refresh() async {
@@ -74,6 +75,7 @@ final class Store: ObservableObject {
             error = nil
             runSmartAuto()
             History.shared.record(self)
+            publishWidgetState()
         } catch {
             self.error = error.localizedDescription
         }
@@ -266,6 +268,7 @@ final class Store: ObservableObject {
         pendingUntil[id] = Date().addingTimeInterval(8)
         do {
             try await client.set(puid: before.puid, properties: props.mapValues(String.init))
+            publishWidgetState()
         } catch {
             if let i = appliances.firstIndex(where: { $0.id == id }) { appliances[i] = before }
             pendingUntil[id] = nil

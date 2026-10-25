@@ -53,6 +53,11 @@ jobs:
           VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")
           # Sideloaders (FlareStore etc.) only compare the version string, so make it <version>.<build>.
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION.$BUILD" "$PLIST"
+          EXT="Payload/ColdFront.app/PlugIns/EquinoxWidget.appex"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$EXT/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION.$BUILD" "$EXT/Info.plist"
+          codesign --force --sign - --timestamp=none --entitlements "$GITHUB_WORKSPACE/EquinoxWidget/EquinoxWidget.entitlements" "$EXT"
+          codesign --force --sign - --timestamp=none --entitlements "$GITHUB_WORKSPACE/ColdFront/ColdFront.entitlements" "Payload/ColdFront.app"
           IPA="$DISPLAY-$VERSION-build-$BUILD.ipa"
           zip -qr "$IPA" Payload
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
