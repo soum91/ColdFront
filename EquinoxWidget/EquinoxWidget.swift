@@ -14,7 +14,7 @@ struct ACEntry: TimelineEntry {
     var state: ACWidgetState?
     static func make(_ id: String?) -> ACEntry {
         let list = ACWidgetState.load()
-        let state = id == nil ? list.first : (list.first { $0.id == id } ?? (list.count == 1 ? list.first : nil))
+        let state = id.flatMap { chosen in list.first { $0.id == chosen } } ?? list.first
         return .init(date: .now, state: state)
     }
 }
@@ -135,6 +135,14 @@ struct ACWidgetView: View {
             }
         } else if family == .accessoryInline {
             Label("AC --", systemImage: "thermometer.medium")
+        } else if family == .accessoryRectangular {
+            HStack(spacing: 6) {
+                Image(systemName: "thermometer.medium")
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("AC --").font(.headline)
+                    Text("No saved reading").font(.caption2)
+                }
+            }
         } else {
             Label("Open Equinox to load your AC", systemImage: "thermometer.medium")
                 .font(.caption)

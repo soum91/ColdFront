@@ -78,6 +78,27 @@ enum AppGroup {
             }
             searchFrom = arrayEnd.upperBound
         }
+        // Entitlements in re-signed applications can be stored as DER/binary,
+        // not an XML <array>. Discover ASCII App Group IDs in the signed
+        // profile / executable as well; containerURL verifies actual access.
+        let marker = Data("group.".utf8)
+        var offset = data.startIndex
+        while let match = data.range(of: marker, in: offset..<data.endIndex) {
+            var end = match.upperBound
+            while end < data.endIndex {
+                let b = data[end]
+                if (b >= 65 && b <= 90) || (b >= 97 && b <= 122) ||
+                   (b >= 48 && b <= 57) || b == 46 || b == 45 || b == 95 {
+                    end = data.index(after: end)
+                } else { break }
+            }
+            if end > match.upperBound,
+               let id = String(data: data[match.lowerBound..<end], encoding: .utf8),
+               !out.contains(id) {
+                out.append(id)
+            }
+            offset = end
+        }
         return out
     }
 
@@ -91,18 +112,25 @@ enum AppGroup {
     static func file(_ name: String) -> URL { containerURL.appendingPathComponent(name) }
 
     static func read<T: Decodable>(_ type: T.Type, _ name: String) -> T? {
-        let newest = containers
+        // Several valid shared containers may exist after a re-sign. If the
+        // newest file is damaged or can't be decoded, try the other copies.
+        let files = containers
             .map { $0.appendingPathComponent(name) }
             .compactMap { url -> (URL, Date)? in
                 guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
                       let date = attrs[.modificationDate] as? Date else { return nil }
                 return (url, date)
             }
-            .max { $0.1 < $1.1 }
-        guard let url = newest?.0, let data = try? Data(contentsOf: url) else { return nil }
+            .sorted { $0.1 > $1.1 }
         let dec = JSONDecoder()
         dec.dateDecodingStrategy = .secondsSince1970
-        return try? dec.decode(T.self, from: data)
+        for (url, _) in files {
+            if let data = try? Data(contentsOf: url),
+               let value = try? dec.decode(T.self, from: data) {
+                return value
+            }
+        }
+        return nil
     }
 
     static func write<T: Encodable>(_ value: T, _ name: String) {
