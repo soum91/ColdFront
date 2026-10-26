@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.24",
+          "buildVersion": "24",
+          "date": "2026-10-26T02:12:10Z",
+          "localizedDescription": "- Use minimal lockscreen temperature layout and explicit AC control artwork (7d3f15f)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-24/Equinox-1.6.0-build-24.ipa",
+          "size": 1093029,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.23",
           "buildVersion": "23",
           "date": "2026-10-26T00:11:38Z",
@@ -128,11 +137,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.23",
-      "versionDate": "2026-10-26T00:11:38Z",
-      "versionDescription": "- Expose AC-to-widget diagnostics and improve saved temperature lookup (c859aa3)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-23/Equinox-1.6.0-build-23.ipa",
-      "size": 1092029,
+      "version": "1.6.0.24",
+      "versionDate": "2026-10-26T02:12:10Z",
+      "versionDescription": "- Use minimal lockscreen temperature layout and explicit AC control artwork (7d3f15f)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-24/Equinox-1.6.0-build-24.ipa",
+      "size": 1093029,
       "appPermissions": {}
     }
   ],
