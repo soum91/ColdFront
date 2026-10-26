@@ -70,17 +70,15 @@ struct EquinoxTemperatureView: View {
 
         Group {
             if family == .accessoryCircular {
-                ZStack {
-                    AccessoryWidgetBackground()
-                    VStack(spacing: 1) {
-                        Image(systemName: "thermometer.medium")
-                            .font(.system(size: 14, weight: .medium))
-                        Text(room)
-                            .font(.system(size: 11, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                    }
+                VStack(spacing: 1) {
+                    Image(systemName: "thermometer.medium")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text(room)
+                        .font(.system(size: 11, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 HStack(spacing: 6) {
                     Image(systemName: "thermometer.medium")
@@ -157,7 +155,8 @@ struct ACWidgetView: View {
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(kind: "com.soum91.coldfront.power", provider: ACControlProvider()) { entry in
             ControlWidgetToggle(entry.state?.name ?? "AC", isOn: entry.state?.on ?? false, action: ACPowerIntent(entry.state?.id ?? "")) {
-                Label($0 ? "On" : "Off", systemImage: "snowflake")
+                Image(systemName: $0 ? "power.circle.fill" : "power")
+                    .controlWidgetActionHint($0 ? "Turn off AC" : "Turn on AC")
             }
         }.displayName("AC power").description("Switch your selected AC on or off.")
     }
