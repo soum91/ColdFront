@@ -149,7 +149,7 @@ struct EquinoxShortcuts: AppShortcutsProvider {
                     phrases: ["Run a scene in \(.applicationName)", "Run an \(.applicationName) scene"],
                     shortTitle: "Run Scene", systemImageName: "sparkles")
         AppShortcut(intent: ToggleACShortcutIntent(),
-                    phrases: ["Toggle the AC in \\(.applicationName)", "Switch the AC with \\(.applicationName)"],
+                    phrases: ["Toggle the AC in \(.applicationName)", "Switch the AC with \(.applicationName)"],
                     shortTitle: "AC Switch", systemImageName: "air.conditioner.horizontal")
         AppShortcut(intent: TurnOffACIntent(),
                     phrases: ["Turn off the AC with \(.applicationName)"],
