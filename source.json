@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.27",
+          "buildVersion": "27",
+          "date": "2026-10-27T04:47:08Z",
+          "localizedDescription": "- Fix App Shortcut utterances for Siri and Control Center (08dd050)\n- Add one-tap AC Switch Shortcut for Control Center (4fedd4a)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-27/Equinox-1.6.0-build-27.ipa",
+          "size": 1095878,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.25",
           "buildVersion": "25",
           "date": "2026-10-27T01:38:41Z",
@@ -146,11 +155,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.25",
-      "versionDate": "2026-10-27T01:38:41Z",
-      "versionDescription": "- Run Shortcuts actions in the app instead of the widget extension (c485cca)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-25/Equinox-1.6.0-build-25.ipa",
-      "size": 1092964,
+      "version": "1.6.0.27",
+      "versionDate": "2026-10-27T04:47:08Z",
+      "versionDescription": "- Fix App Shortcut utterances for Siri and Control Center (08dd050)\n- Add one-tap AC Switch Shortcut for Control Center (4fedd4a)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-27/Equinox-1.6.0-build-27.ipa",
+      "size": 1095878,
       "appPermissions": {}
     }
   ],
