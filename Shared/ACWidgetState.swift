@@ -43,6 +43,11 @@ enum ACQuickAction: String, AppEnum {
     }
 }
 struct ACActionIntent: LiveActivityIntent {
+    #if WIDGET_EXTENSION
+    // The widget extension cannot be launched to run intents on this iOS, so
+    // Shortcuts must only see (and run) the copy inside the app.
+    static let isDiscoverable = false
+    #endif
     static var title: LocalizedStringResource = "Control Equinox"
     @Parameter(title: "Device ID") var deviceID: String
     @Parameter(title: "Action") var action: ACQuickAction
@@ -56,6 +61,11 @@ struct ACActionIntent: LiveActivityIntent {
     }
 }
 @available(iOS 18.0, *) struct ACPowerIntent: SetValueIntent, LiveActivityIntent {
+    #if WIDGET_EXTENSION
+    // The widget extension cannot be launched to run intents on this iOS, so
+    // Shortcuts must only see (and run) the copy inside the app.
+    static let isDiscoverable = false
+    #endif
     static var title: LocalizedStringResource = "AC power"
     @Parameter(title: "Device ID") var deviceID: String
     @Parameter(title: "On") var value: Bool
@@ -69,6 +79,11 @@ struct ACActionIntent: LiveActivityIntent {
     }
 }
 struct ACToggleIntent: LiveActivityIntent {
+    #if WIDGET_EXTENSION
+    // The widget extension cannot be launched to run intents on this iOS, so
+    // Shortcuts must only see (and run) the copy inside the app.
+    static let isDiscoverable = false
+    #endif
     static var title: LocalizedStringResource = "Toggle AC"
     @Parameter(title: "Device ID") var deviceID: String
     init() { deviceID = "" }
