@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.25",
+          "buildVersion": "25",
+          "date": "2026-10-27T01:38:41Z",
+          "localizedDescription": "- Run Shortcuts actions in the app instead of the widget extension (c485cca)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-25/Equinox-1.6.0-build-25.ipa",
+          "size": 1092964,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.24",
           "buildVersion": "24",
           "date": "2026-10-26T02:12:10Z",
@@ -137,11 +146,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.24",
-      "versionDate": "2026-10-26T02:12:10Z",
-      "versionDescription": "- Use minimal lockscreen temperature layout and explicit AC control artwork (7d3f15f)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-24/Equinox-1.6.0-build-24.ipa",
-      "size": 1093029,
+      "version": "1.6.0.25",
+      "versionDate": "2026-10-27T01:38:41Z",
+      "versionDescription": "- Run Shortcuts actions in the app instead of the widget extension (c485cca)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-25/Equinox-1.6.0-build-25.ipa",
+      "size": 1092964,
       "appPermissions": {}
     }
   ],
