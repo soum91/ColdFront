@@ -126,11 +126,31 @@ struct GetRoomTemperatureIntent: AppIntent {
     }
 }
 
+/// App-only one-tap action for Apple's Shortcut control in Control Center.
+struct ToggleACShortcutIntent: AppIntent {
+    static var title: LocalizedStringResource = "Toggle AC Power"
+    static var description = IntentDescription("Switches the air conditioner on or off.")
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        let store = try signedInStore()
+        await store.refresh()
+        let air = store.appliances.filter { $0.isAirConditioner && $0.online }
+        guard !air.isEmpty else { throw EquinoxIntentError(message: "No online air conditioner.") }
+        let anyOn = air.contains(where: \.isOn)
+        try await store.runScene(ACScene(name: anyOn ? "Off" : "On", icon: "power", power: !anyOn))
+        return .result()
+    }
+}
+
 struct EquinoxShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: RunSceneIntent(),
                     phrases: ["Run a scene in \(.applicationName)", "Run an \(.applicationName) scene"],
                     shortTitle: "Run Scene", systemImageName: "sparkles")
+        AppShortcut(intent: ToggleACShortcutIntent(),
+                    phrases: ["Toggle the AC in \\(.applicationName)", "Switch the AC with \\(.applicationName)"],
+                    shortTitle: "AC Switch", systemImageName: "air.conditioner.horizontal")
         AppShortcut(intent: TurnOffACIntent(),
                     phrases: ["Turn off the AC with \(.applicationName)"],
                     shortTitle: "Turn Off AC", systemImageName: "power")
