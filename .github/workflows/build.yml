@@ -33,6 +33,7 @@ jobs:
 
       - name: Build
         run: |
+          set -o pipefail
           xcodebuild \
             -project ColdFront.xcodeproj \
             -scheme ColdFront \
@@ -42,7 +43,22 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             CURRENT_PROJECT_VERSION=$BUILD \
-            build
+            build 2>&1 | tee build.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
+
+      - name: Publish build log
+        if: always()
+        run: |
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          grep -E "error:|warning:" build.log | sort -u > ci-errors.log || true
+          tail -n 300 build.log >> ci-errors.log 2>/dev/null || echo "no build.log" >> ci-errors.log
+          git stash -u -q || true
+          git checkout -q -B ci-logs-ios
+          git stash pop -q || true
+          git add -f ci-errors.log
+          git commit -qm "iOS CI log for ${GITHUB_SHA}" || true
+          git push -qf origin ci-logs-ios
+          git checkout -q -f "$GITHUB_SHA"
 
       - name: Package IPA
         run: |

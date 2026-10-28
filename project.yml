@@ -38,6 +38,11 @@ targets:
           broadcasts to get the room temperature and humidity.
         BGTaskSchedulerPermittedIdentifiers:
         - com.soum91.coldfront.refresh
+        NSLocalNetworkUsageDescription: Equinox talks to your Keystone Bridge over Wi-Fi to put the AC in Apple Home.
+        NSBonjourServices:
+        - _afterglow._tcp
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.soum91.coldfront

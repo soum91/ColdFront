@@ -10,6 +10,19 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    NavigationLink {
+                        HomeBridgeView().environmentObject(store)
+                    } label: {
+                        HStack {
+                            Label("Keystone Bridge", systemImage: "homekit")
+                            Spacer()
+                            Text(HomeBridgeLink.stored.isSet ? "Paired" : "Set up").foregroundStyle(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text("Puts the AC in Apple Home and runs Smart Auto on the ESP32 bridge, 24/7.")
+                }
                 Section("Account") {
                     LabeledContent("Signed in as", value: store.savedUsername)
                     Button("Sign out", role: .destructive) {

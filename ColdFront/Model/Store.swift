@@ -11,7 +11,15 @@ final class Store: ObservableObject {
     @Published var error: String?
     @Published var lastUpdated: Date?
     @Published var smart: [String: SmartAuto] = SmartAutoStore.load() {
-        didSet { SmartAutoStore.save(smart) }
+        didSet {
+            SmartAutoStore.save(smart)
+            // Only the person's changes matter to the bridge (enabled, setpoint, band), not bookkeeping.
+            let changed = smart.contains { id, s in
+                let o = oldValue[id]
+                return o?.enabled != s.enabled || o?.setpoint != s.setpoint || o?.band != s.band || o?.fahrenheit != s.fahrenheit
+            }
+            if changed { pushSmartAutoToBridge() }
+        }
     }
     @Published var scenes: [ACScene] = ScenesStore.load() {
         didSet {
@@ -89,7 +97,7 @@ final class Store: ObservableObject {
         lastUpdated = Date()
         History.shared.record(self)
         defer { History.shared.save() }
-        for a in fresh {
+        for a in fresh where !bridgeOwnsAuto {
             guard let st = smartAuto(a) else { continue }
             let (cmd, next) = st.decide(for: a, room: roomTemp(a).value, userAction: false)
             if next != st { smart[a.id] = next }
@@ -187,12 +195,18 @@ final class Store: ObservableObject {
 
     /// Called after every poll.
     func runSmartAuto() {
+        guard !bridgeOwnsAuto else { return }   // the bridge decides
         for a in appliances where smartAuto(a) != nil {
             applySmart(a, userAction: false)
         }
     }
 
     private func applySmart(_ a: Appliance, userAction: Bool, extra: [String: Int] = [:]) {
+        if bridgeOwnsAuto {
+            // The bridge gets the new settings through pushSmartAutoToBridge; only power-on goes from here.
+            if !extra.isEmpty { send(a.id, extra) }
+            return
+        }
         guard let st = smartAuto(a) else { return }
         let (props, next) = st.decide(for: a, room: roomTemp(a).value, userAction: userAction)
         if next != st { smart[a.id] = next }
