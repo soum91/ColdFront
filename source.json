@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.28",
+          "buildVersion": "28",
+          "date": "2026-10-28T04:37:10Z",
+          "localizedDescription": "- Put the AC in Apple Home through the Keystone Bridge, with Smart Auto running there (321fe75)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-28/Equinox-1.6.0-build-28.ipa",
+          "size": 1153816,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.27",
           "buildVersion": "27",
           "date": "2026-10-27T04:47:08Z",
@@ -155,11 +164,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.27",
-      "versionDate": "2026-10-27T04:47:08Z",
-      "versionDescription": "- Fix App Shortcut utterances for Siri and Control Center (08dd050)\n- Add one-tap AC Switch Shortcut for Control Center (4fedd4a)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-27/Equinox-1.6.0-build-27.ipa",
-      "size": 1095878,
+      "version": "1.6.0.28",
+      "versionDate": "2026-10-28T04:37:10Z",
+      "versionDescription": "- Put the AC in Apple Home through the Keystone Bridge, with Smart Auto running there (321fe75)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-28/Equinox-1.6.0-build-28.ipa",
+      "size": 1153816,
       "appPermissions": {}
     }
   ],
