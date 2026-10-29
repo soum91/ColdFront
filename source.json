@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.31",
+          "buildVersion": "31",
+          "date": "2026-10-29T16:44:05Z",
+          "localizedDescription": "- Smart: stop the set temp jumping back (9cf7dfb)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-31/Equinox-1.6.0-build-31.ipa",
+          "size": 1163423,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.30",
           "buildVersion": "30",
           "date": "2026-10-29T16:25:39Z",
@@ -182,11 +191,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.30",
-      "versionDate": "2026-10-29T16:25:39Z",
-      "versionDescription": "- Both Smart and the unit's own Auto (91c0fc7)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-30/Equinox-1.6.0-build-30.ipa",
-      "size": 1162900,
+      "version": "1.6.0.31",
+      "versionDate": "2026-10-29T16:44:05Z",
+      "versionDescription": "- Smart: stop the set temp jumping back (9cf7dfb)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-31/Equinox-1.6.0-build-31.ipa",
+      "size": 1163423,
       "appPermissions": {}
     }
   ],
