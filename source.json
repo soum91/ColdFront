@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.29",
+          "buildVersion": "29",
+          "date": "2026-10-29T16:19:44Z",
+          "localizedDescription": "- Auto stays in step with Keystone (4f781e6)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-29/Equinox-1.6.0-build-29.ipa",
+          "size": 1157217,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.28",
           "buildVersion": "28",
           "date": "2026-10-28T04:37:10Z",
@@ -164,11 +173,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.28",
-      "versionDate": "2026-10-28T04:37:10Z",
-      "versionDescription": "- Put the AC in Apple Home through the Keystone Bridge, with Smart Auto running there (321fe75)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-28/Equinox-1.6.0-build-28.ipa",
-      "size": 1153816,
+      "version": "1.6.0.29",
+      "versionDate": "2026-10-29T16:19:44Z",
+      "versionDescription": "- Auto stays in step with Keystone (4f781e6)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-29/Equinox-1.6.0-build-29.ipa",
+      "size": 1157217,
       "appPermissions": {}
     }
   ],
