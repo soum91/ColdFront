@@ -62,6 +62,12 @@ struct ControlView: View {
                                  : "Cools once the room is \(band)° above your set temp, drops to fan once it's \(band)° below (no heat on this unit). Mode changes need the reading to hold 5 min and stay at least 30 min apart.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            if store.bridgeHasAC {
+                                Label(store.bridgeOwnsAuto ? "Run by the Keystone Bridge, all the time"
+                                                           : "Run by this phone: the bridge can't reach the AC right now",
+                                      systemImage: store.bridgeOwnsAuto ? "cpu" : "iphone")
+                                    .font(.caption).foregroundStyle(store.bridgeOwnsAuto ? Color.secondary : Color.orange)
+                            }
                         }
                     }
                     section("Fan speed") { fanRow(a, accent) }

@@ -155,7 +155,11 @@ final class OnceFlag: @unchecked Sendable {
 
 extension Store {
     /// True once the AC is on the bridge: the bridge then owns Smart Auto, so the app stops deciding itself.
-    var bridgeOwnsAuto: Bool { HomeBridgeLink.stored.isSet && HomeBridgeLink.stored.lastSent != nil }
+    /// The AC has been sent to the bridge.
+    var bridgeHasAC: Bool { HomeBridgeLink.stored.isSet && HomeBridgeLink.stored.lastSent != nil }
+    /// The bridge runs Smart only while it's actually reaching the AC (checked on every refresh). If it can't
+    /// (its ConnectLife login failing, or it can't be checked), Equinox runs Smart itself, so it never stalls.
+    var bridgeOwnsAuto: Bool { bridgeHasAC && Date().timeIntervalSince(HomeBridgeSync.acOKAt) < 240 }
 
     func homeBridgeConfig() -> (body: [String: Any]?, problem: String?) {
         guard let creds = Keychain.load() else { return (nil, "Sign in to ConnectLife first.") }
@@ -174,11 +178,13 @@ extension Store {
     /// The other way round: Smart Auto changed in Keystone (or on the bridge) shows up here too.
     func syncSmartAutoFromBridge() async {
         let l = HomeBridgeLink.stored
-        // A change made here wins: don't read the bridge back until it has surely received it.
-        guard Date().timeIntervalSince(HomeBridgeSync.localChangeAt) > 20 else { return }
-        guard bridgeOwnsAuto, let a = appliances.first(where: \.isAirConditioner),
+        guard bridgeHasAC, let a = appliances.first(where: \.isAirConditioner),
               let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port),
-              let ac = info["ac"] as? [String: Any], let au = ac["auto"] as? [String: Any],
+              let ac = info["ac"] as? [String: Any] else { return }
+        if ac["ok"] as? Bool == true { HomeBridgeSync.acOKAt = Date() }
+        // A change made here wins: don't read the bridge back until it has surely received it.
+        guard bridgeOwnsAuto, Date().timeIntervalSince(HomeBridgeSync.localChangeAt) > 20,
+              let au = ac["auto"] as? [String: Any],
               let en = au["enabled"] as? Bool,
               let sp = (au["setpoint"] as? NSNumber)?.doubleValue,
               let band = (au["band"] as? NSNumber)?.doubleValue else { return }
@@ -195,7 +201,7 @@ extension Store {
 
     /// Keep the bridge's Smart Auto in step with the app (setpoint, band, on/off). Debounced.
     func pushSmartAutoToBridge() {
-        guard bridgeOwnsAuto, !HomeBridgeSync.suppressPush else { return }
+        guard bridgeHasAC, !HomeBridgeSync.suppressPush else { return }
         HomeBridgeSync.localChangeAt = Date()
         HomeBridgeSync.schedule { [weak self] in
             guard let body = self?.homeBridgeConfig().body else { return }
@@ -209,6 +215,7 @@ enum HomeBridgeSync {
     private static var task: Task<Void, Never>?
     static var suppressPush = false
     static var localChangeAt = Date.distantPast
+    static var acOKAt = Date.distantPast
     static func schedule(_ work: @escaping () async -> Void) {
         task?.cancel()
         task = Task {
