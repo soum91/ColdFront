@@ -174,6 +174,8 @@ extension Store {
     /// The other way round: Smart Auto changed in Keystone (or on the bridge) shows up here too.
     func syncSmartAutoFromBridge() async {
         let l = HomeBridgeLink.stored
+        // A change made here wins: don't read the bridge back until it has surely received it.
+        guard Date().timeIntervalSince(HomeBridgeSync.localChangeAt) > 20 else { return }
         guard bridgeOwnsAuto, let a = appliances.first(where: \.isAirConditioner),
               let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port),
               let ac = info["ac"] as? [String: Any], let au = ac["auto"] as? [String: Any],
@@ -194,6 +196,7 @@ extension Store {
     /// Keep the bridge's Smart Auto in step with the app (setpoint, band, on/off). Debounced.
     func pushSmartAutoToBridge() {
         guard bridgeOwnsAuto, !HomeBridgeSync.suppressPush else { return }
+        HomeBridgeSync.localChangeAt = Date()
         HomeBridgeSync.schedule { [weak self] in
             guard let body = self?.homeBridgeConfig().body else { return }
             _ = try? await HomeBridgeAPI.send(body, HomeBridgeLink.stored)
@@ -205,6 +208,7 @@ extension Store {
 enum HomeBridgeSync {
     private static var task: Task<Void, Never>?
     static var suppressPush = false
+    static var localChangeAt = Date.distantPast
     static func schedule(_ work: @escaping () async -> Void) {
         task?.cancel()
         task = Task {
