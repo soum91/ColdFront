@@ -80,6 +80,7 @@ final class Store: ObservableObject {
             }
             appliances = fresh
             lastUpdated = now
+            Task { await self.syncSmartAutoFromBridge() }
             error = nil
             runSmartAuto()
             History.shared.record(self)

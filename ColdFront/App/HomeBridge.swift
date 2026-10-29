@@ -171,9 +171,29 @@ extension Store {
                         "heat": a.heatSupported, "auto": auto]], nil)
     }
 
+    /// The other way round: Smart Auto changed in Keystone (or on the bridge) shows up here too.
+    func syncSmartAutoFromBridge() async {
+        let l = HomeBridgeLink.stored
+        guard bridgeOwnsAuto, let a = appliances.first(where: \.isAirConditioner),
+              let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port),
+              let ac = info["ac"] as? [String: Any], let au = ac["auto"] as? [String: Any],
+              let en = au["enabled"] as? Bool,
+              let sp = (au["setpoint"] as? NSNumber)?.doubleValue,
+              let band = (au["band"] as? NSNumber)?.doubleValue else { return }
+        var s = smart[a.id] ?? SmartAuto(enabled: false, setpoint: 21, fahrenheit: a.fahrenheit)
+        let f = s.fahrenheit
+        let spU = f ? Int((sp * 9 / 5 + 32).rounded()) : Int(sp.rounded())
+        let bU = max(1, Int((f ? band * 9 / 5 : band).rounded()))
+        guard s.enabled != en || s.setpoint != spU || (s.band ?? SmartAuto.defaultBand(fahrenheit: f)) != bU else { return }
+        s.enabled = en; s.setpoint = spU; s.band = bU
+        HomeBridgeSync.suppressPush = true
+        smart[a.id] = s
+        HomeBridgeSync.suppressPush = false
+    }
+
     /// Keep the bridge's Smart Auto in step with the app (setpoint, band, on/off). Debounced.
     func pushSmartAutoToBridge() {
-        guard bridgeOwnsAuto else { return }
+        guard bridgeOwnsAuto, !HomeBridgeSync.suppressPush else { return }
         HomeBridgeSync.schedule { [weak self] in
             guard let body = self?.homeBridgeConfig().body else { return }
             _ = try? await HomeBridgeAPI.send(body, HomeBridgeLink.stored)
@@ -184,6 +204,7 @@ extension Store {
 @MainActor
 enum HomeBridgeSync {
     private static var task: Task<Void, Never>?
+    static var suppressPush = false
     static func schedule(_ work: @escaping () async -> Void) {
         task?.cancel()
         task = Task {
