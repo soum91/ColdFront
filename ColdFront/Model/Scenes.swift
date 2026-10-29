@@ -22,7 +22,7 @@ struct ACScene: Codable, Identifiable, Hashable {
     var summary: String {
         guard power else { return "Turn off" }
         var parts: [String] = []
-        if let m = acMode { parts.append(m == .auto ? "Auto" : m.label) }
+        if let m = acMode { parts.append(m == .auto ? "Smart" : m.label) }
         if let t = temp { parts.append("\(t)\(tempFahrenheit ? "°F" : "°C")") }
         if let f = fan, let fs = FanSpeed(rawValue: f) { parts.append("fan \(fs.label.lowercased())") }
         if sleep == true { parts.append("sleep") }

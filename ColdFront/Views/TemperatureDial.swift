@@ -19,9 +19,9 @@ struct TemperatureDial: View {
         guard appliance.isOn else { return "OFF" }
         guard smart != nil else { return appliance.mode.label.uppercased() }
         switch appliance.mode {
-        case .cool: return "AUTO · COOLING"
-        case .heat: return "AUTO · HEATING"
-        default: return "AUTO · IDLE"
+        case .cool: return "SMART · COOLING"
+        case .heat: return "SMART · HEATING"
+        default: return "SMART · IDLE"
         }
     }
     private var fraction: Double {

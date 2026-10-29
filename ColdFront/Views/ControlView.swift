@@ -92,7 +92,7 @@ struct ControlView: View {
         if !a.isOn { return ("Off", Color(white: 0.55)) }
         if let s = store.smartAuto(a) {
             let phase = a.mode == .cool ? "cooling" : a.mode == .heat ? "heating" : "idle"
-            return ("Auto, \(phase) to \(s.target(for: a))\(a.unitSymbol)", Theme.accent(a))
+            return ("Smart, \(phase) to \(s.target(for: a))\(a.unitSymbol)", Theme.accent(a))
         }
         var t = a.mode.label
         if a.mode.allowsTemperature, let v = a.targetTemp { t += " to \(v)\(a.unitSymbol)" }
@@ -234,25 +234,33 @@ struct ControlView: View {
         .card()
     }
 
+    /// Smart = Equinox/Keystone Smart Auto (switches cool/heat on the room temperature, run by the bridge).
+    /// Auto = the unit's own auto mode. Then the plain modes.
     private func modeRow(_ a: Appliance, _ accent: Color) -> some View {
-        HStack(spacing: 8) {
-            ForEach(a.supportedModes) { m in
-                let smartOn = store.smartAuto(a) != nil
-                let selected = a.isOn && (m == .auto ? smartOn : (!smartOn && a.mode == m))
-                Button { store.setMode(a, m) } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: m.symbol).font(.title3)
-                        Text(m.label).font(.caption)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(selected ? accent : Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-                    .foregroundStyle(selected ? .black : .primary)
-                }
-                .buttonStyle(.plain)
+        let smartOn = store.smartAuto(a) != nil
+        let plain = a.supportedModes.filter { $0 != .auto }
+        return HStack(spacing: 6) {
+            modeButton("Smart", "sparkles", selected: a.isOn && smartOn, accent) { store.setMode(a, .auto) }
+            modeButton("Auto", ACMode.auto.symbol, selected: a.isOn && !smartOn && a.mode == .auto, accent) { store.setUnitAuto(a) }
+            ForEach(plain) { m in
+                modeButton(m.label, m.symbol, selected: a.isOn && !smartOn && a.mode == m, accent) { store.setMode(a, m) }
             }
         }
         .sensoryFeedback(.selection, trigger: a.mode)
+    }
+
+    private func modeButton(_ label: String, _ symbol: String, selected: Bool, _ accent: Color, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: symbol).font(.title3)
+                Text(label).font(.caption).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(selected ? accent : Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .foregroundStyle(selected ? .black : .primary)
+        }
+        .buttonStyle(.plain)
     }
 
     private func fanRow(_ a: Appliance, _ accent: Color) -> some View {

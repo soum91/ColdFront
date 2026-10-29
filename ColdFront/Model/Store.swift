@@ -240,6 +240,12 @@ final class Store: ObservableObject {
         send(a.id, p)
     }
 
+    /// The unit's own auto mode (it picks its own setpoint): Smart Auto steps aside.
+    func setUnitAuto(_ a: Appliance) {
+        disableSmartAuto(a.id)
+        send(a.id, [P.power: 1, P.mode: ACMode.auto.rawValue])
+    }
+
     func setTemp(_ a: Appliance, _ t: Int) {
         let clamped = min(max(t, a.tempRange.lowerBound), a.tempRange.upperBound)
         if var s = smartAuto(a) {

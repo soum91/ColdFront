@@ -108,7 +108,7 @@ struct SceneEditor: View {
                     Section("Mode") {
                         Picker("Mode", selection: $scene.mode) {
                             Text("Don't change").tag(Int?.none)
-                            Text("Auto (Equinox)").tag(Int?.some(ACMode.auto.rawValue))
+                            Text("Smart").tag(Int?.some(ACMode.auto.rawValue))
                             Text("Cool").tag(Int?.some(ACMode.cool.rawValue))
                             if heatSupported { Text("Heat").tag(Int?.some(ACMode.heat.rawValue)) }
                             Text("Dry").tag(Int?.some(ACMode.dry.rawValue))
