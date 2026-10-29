@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.32",
+          "buildVersion": "32",
+          "date": "2026-10-29T16:51:28Z",
+          "localizedDescription": "- Smart: never stall when the bridge can't reach the AC (8568e36)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-32/Equinox-1.6.0-build-32.ipa",
+          "size": 1163774,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.31",
           "buildVersion": "31",
           "date": "2026-10-29T16:44:05Z",
@@ -191,11 +200,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.31",
-      "versionDate": "2026-10-29T16:44:05Z",
-      "versionDescription": "- Smart: stop the set temp jumping back (9cf7dfb)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-31/Equinox-1.6.0-build-31.ipa",
-      "size": 1163423,
+      "version": "1.6.0.32",
+      "versionDate": "2026-10-29T16:51:28Z",
+      "versionDescription": "- Smart: never stall when the bridge can't reach the AC (8568e36)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-32/Equinox-1.6.0-build-32.ipa",
+      "size": 1163774,
       "appPermissions": {}
     }
   ],
