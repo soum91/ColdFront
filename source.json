@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.6.0.33",
+          "buildVersion": "33",
+          "date": "2026-10-29T16:55:17Z",
+          "localizedDescription": "- Smart: show the unit's real mode instead of Idle (bbb749c)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-33/Equinox-1.6.0-build-33.ipa",
+          "size": 1163890,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.32",
           "buildVersion": "32",
           "date": "2026-10-29T16:51:28Z",
@@ -200,11 +209,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.32",
-      "versionDate": "2026-10-29T16:51:28Z",
-      "versionDescription": "- Smart: never stall when the bridge can't reach the AC (8568e36)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-32/Equinox-1.6.0-build-32.ipa",
-      "size": 1163774,
+      "version": "1.6.0.33",
+      "versionDate": "2026-10-29T16:55:17Z",
+      "versionDescription": "- Smart: show the unit's real mode instead of Idle (bbb749c)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-33/Equinox-1.6.0-build-33.ipa",
+      "size": 1163890,
       "appPermissions": {}
     }
   ],
