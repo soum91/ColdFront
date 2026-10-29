@@ -21,7 +21,7 @@ struct TemperatureDial: View {
         switch appliance.mode {
         case .cool: return "SMART · COOLING"
         case .heat: return "SMART · HEATING"
-        default: return "SMART · IDLE"
+        default: return "SMART · " + appliance.mode.label.uppercased()   // what the unit is actually in
         }
     }
     private var fraction: Double {

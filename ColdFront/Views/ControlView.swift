@@ -97,7 +97,7 @@ struct ControlView: View {
         if !a.online { return ("Offline", .red) }
         if !a.isOn { return ("Off", Color(white: 0.55)) }
         if let s = store.smartAuto(a) {
-            let phase = a.mode == .cool ? "cooling" : a.mode == .heat ? "heating" : "idle"
+            let phase = a.mode == .cool ? "cooling" : a.mode == .heat ? "heating" : "unit in \(a.mode.label)"
             return ("Smart, \(phase) to \(s.target(for: a))\(a.unitSymbol)", Theme.accent(a))
         }
         var t = a.mode.label
