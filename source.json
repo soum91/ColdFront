@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.34",
+          "buildVersion": "34",
+          "date": "2026-11-05T16:08:05Z",
+          "localizedDescription": "- Home screen widget that actually renders, and an Exhale-style continuous temperature graph (2effc4c)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-34/Equinox-1.7.0-build-34.ipa",
+          "size": 1250219,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.6.0.33",
           "buildVersion": "33",
           "date": "2026-10-29T16:55:17Z",
@@ -209,11 +218,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.6.0.33",
-      "versionDate": "2026-10-29T16:55:17Z",
-      "versionDescription": "- Smart: show the unit's real mode instead of Idle (bbb749c)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-33/Equinox-1.6.0-build-33.ipa",
-      "size": 1163890,
+      "version": "1.7.0.34",
+      "versionDate": "2026-11-05T16:08:05Z",
+      "versionDescription": "- Home screen widget that actually renders, and an Exhale-style continuous temperature graph (2effc4c)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-34/Equinox-1.7.0-build-34.ipa",
+      "size": 1250219,
       "appPermissions": {}
     }
   ],
