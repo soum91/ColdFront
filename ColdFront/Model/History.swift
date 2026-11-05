@@ -19,6 +19,7 @@ final class History: ObservableObject {
     @Published private(set) var log: [String: [Sample]] = [:]
     private let keep: TimeInterval = 7 * 24 * 3600
     private var lastSave = Date.distantPast
+    private var lastShared = Date.distantPast
 
     private var url: URL {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -53,6 +54,26 @@ final class History: ObservableObject {
             log[a.id] = list
         }
         if now.timeIntervalSince(lastSave) > 300 { save() }
+        if now.timeIntervalSince(lastShared) > 240 { publishShared() }
+    }
+
+    /// Last 12 h per AC, bucketed small, for the widgets' graph (they can't read the app's own files).
+    func publishShared() {
+        lastShared = Date()
+        let end = Date(), start = end.addingTimeInterval(-12 * 3600)
+        var out: [String: ACHistoryWire] = [:]
+        for (id, list) in log {
+            let recent = list.filter { $0.t >= start }
+            let room = recent.compactMap { s in (s.govee ?? s.ac).map { TempPoint(t: s.t, v: $0) } }
+            var set: [TempPoint] = []
+            var last: Double?
+            for s in recent {
+                guard let v = s.set, v != last else { continue }
+                set.append(TempPoint(t: s.t, v: v)); last = v
+            }
+            out[id] = ACHistoryWire(room: TempSeries.bucket(room, from: start, to: end, step: 15 * 60), set: set)
+        }
+        AppGroup.write(out, ACHistoryWire.file)
     }
 
     func save() {

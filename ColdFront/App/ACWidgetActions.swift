@@ -48,8 +48,12 @@ extension Store {
     func publishWidgetState() {
         let snaps = appliances.filter(\.isAirConditioner).map { a in
             ACWidgetState(id: a.id, name: a.name, on: a.isOn, room: roomTemp(a).value,
-                          target: displayedTarget(a), unit: a.unitSymbol, mode: smartAuto(a) == nil ? a.mode.label : "Smart Auto", updatedAt: lastUpdated ?? .now)
+                          target: displayedTarget(a), unit: a.unitSymbol, mode: smartAuto(a) == nil ? a.mode.label : "Smart Auto", updatedAt: lastUpdated ?? .now,
+                          phase: a.isOn ? (a.mode == .cool ? "cool" : a.mode == .heat ? "heat" : "other") : nil,
+                          online: a.online,
+                          acSensor: a.indoorTemp.map(Double.init))
         }
+        if History.shared.log.isEmpty == false { History.shared.publishShared() }
         AppGroup.write(snaps, "ac-widgets.json")
         WidgetCenter.shared.reloadAllTimelines()
         if #available(iOS 18.0, *) { ControlCenter.shared.reloadAllControls() }

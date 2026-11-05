@@ -1,75 +1,108 @@
 import SwiftUI
-import Charts
 
+/// Exhale-style history: one continuous smooth room-temperature line with a soft fill,
+/// the AC's own sensor as a faint second line, and the set temperature as a dashed step.
 struct HistoryChart: View {
     let appliance: Appliance
     @ObservedObject private var history = History.shared
-    @State private var range: TimeInterval = 6 * 3600
+    @State private var range: TimeInterval = 12 * 3600
 
-    private struct Point: Identifiable {
-        let id = UUID()
-        let t: Date
-        let v: Double
-        let series: String     // legend / colour
-        let segment: String    // breaks the line across gaps when the app wasn't running
+    private struct Series {
+        var room: [TempPoint] = []
+        var acLine: [TempPoint] = []    // only drawn when the room line comes from the Govee
+        var set: [TempPoint] = []
+        var roomIsGovee = false
+        var start = Date()
+        var end = Date()
+        var lo = 18.0
+        var hi = 26.0
+    }
+
+    private func build() -> Series {
+        let end = Date(), start = end.addingTimeInterval(-range)
+        let samples = history.samples(appliance.id, since: start)
+        let step = TempSeries.step(for: range)
+        let govee = samples.compactMap { s in s.govee.map { TempPoint(t: s.t, v: $0) } }
+        let ac = samples.compactMap { s in s.ac.map { TempPoint(t: s.t, v: $0) } }
+        var out = Series(start: start, end: end)
+        out.roomIsGovee = govee.count >= 3
+        // Room line: Govee where it was seen, AC sensor filling the rest, so the line never breaks.
+        let room = samples.compactMap { s in (s.govee ?? s.ac).map { TempPoint(t: s.t, v: $0) } }
+        out.room = TempSeries.bucket(room, from: start, to: end, step: step)
+        if out.roomIsGovee { out.acLine = TempSeries.bucket(ac, from: start, to: end, step: step) }
+        var last: Double?
+        for s in samples {
+            guard let v = s.set, v != last else { continue }
+            out.set.append(TempPoint(t: s.t, v: v)); last = v
+        }
+        let all = out.room.map(\.v) + out.acLine.map(\.v) + out.set.map(\.v)
+        (out.lo, out.hi) = TempSeries.bounds(all)
+        return out
+    }
+
+    private var lineColor: Color {
+        guard appliance.isOn else { return EquinoxColor.cool }
+        switch appliance.mode {
+        case .heat: return EquinoxColor.heat
+        default: return EquinoxColor.cool
+        }
     }
 
     var body: some View {
-        let samples = history.samples(appliance.id, since: Date().addingTimeInterval(-range))
-        let points = makePoints(samples)
-        let timeFormat: Date.FormatStyle = range > 86400 ? .dateTime.weekday(.abbreviated) : .dateTime.hour()
+        let s = build()
         VStack(alignment: .leading, spacing: 12) {
             Picker("", selection: $range) {
                 Text("6H").tag(6 * 3600.0)
+                Text("12H").tag(12 * 3600.0)
                 Text("24H").tag(24 * 3600.0)
                 Text("7D").tag(7 * 24 * 3600.0)
             }
             .pickerStyle(.segmented)
 
-            if points.count < 2 {
-                Text("Building up. History is logged once a minute while Equinox is open, plus the odd background check.")
+            if s.room.count < 2 {
+                Text("Building up. Readings are logged once a minute while Equinox is open, plus background checks.")
                     .font(.footnote).foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 160, alignment: .center)
+                    .frame(maxWidth: .infinity, minHeight: 170, alignment: .center)
                     .multilineTextAlignment(.center)
             } else {
-                Chart {
-                    ForEach(modeBands(samples)) { band in
-                        RectangleMark(xStart: .value("From", band.from), xEnd: .value("To", band.to))
-                            .foregroundStyle(band.color.opacity(0.12))
-                    }
-                    ForEach(points) { p in
-                        LineMark(x: .value("Time", p.t), y: .value("Temp", p.v), series: .value("Line", p.segment))
-                            .foregroundStyle(by: .value("Series", p.series))
-                            .interpolationMethod(p.series == "Set" ? .stepEnd : .monotone)
-                            .lineStyle(StrokeStyle(lineWidth: p.series == "Set" ? 1.5 : 2.2,
-                                                   dash: p.series == "Set" ? [4, 3] : []))
+                if let lo = s.room.map(\.v).min(), let hi = s.room.map(\.v).max() {
+                    HStack(spacing: 14) {
+                        stat("Low", lo)
+                        stat("High", hi)
+                        Spacer()
                     }
                 }
-                .chartForegroundStyleScale([
-                    "AC sensor": Color(white: 0.75),
-                    "Govee": Color(red: 0.3, green: 0.85, blue: 0.75),
-                    "Set": Color.yellow
-                ])
-                .chartYScale(domain: .automatic(includesZero: false))
-                .chartYAxis {
-                    AxisMarks(position: .leading) { v in
-                        AxisGridLine().foregroundStyle(Color.white.opacity(0.08))
-                        AxisValueLabel { if let d = v.as(Double.self) { Text("\(Int(d))°") } }
+                HStack(alignment: .top, spacing: 6) {
+                    yAxis(s)
+                    VStack(spacing: 4) {
+                        GeometryReader { geo in
+                            ZStack {
+                                grid(s, geo.size)
+                                if !s.acLine.isEmpty {
+                                    TempCurveShape(points: s.acLine, start: s.start, end: s.end, lo: s.lo, hi: s.hi)
+                                        .stroke(Color.white.opacity(0.28), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                                }
+                                if !s.set.isEmpty {
+                                    StepShape(points: s.set, start: s.start, end: s.end, lo: s.lo, hi: s.hi)
+                                        .stroke(Color.yellow.opacity(0.85), style: StrokeStyle(lineWidth: 1.4, dash: [4, 3]))
+                                }
+                                TempCurve(points: s.room, start: s.start, end: s.end, lo: s.lo, hi: s.hi, color: lineColor)
+                                if let last = s.room.last {
+                                    let p = TempMapper(start: s.start, end: s.end, lo: s.lo, hi: s.hi, size: geo.size).point(last)
+                                    Circle().fill(lineColor).frame(width: 8, height: 8)
+                                        .overlay(Circle().stroke(Color.black.opacity(0.4), lineWidth: 1.5))
+                                        .position(p)
+                                }
+                            }
+                        }
+                        .frame(height: 180)
+                        xAxis(s)
                     }
                 }
-                .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                        AxisGridLine().foregroundStyle(Color.white.opacity(0.06))
-                        AxisValueLabel(format: timeFormat)
-                    }
-                }
-                .chartLegend(position: .bottom, spacing: 8)
-                .frame(height: 190)
-
                 HStack(spacing: 14) {
-                    legendSwatch(Color(red: 0.30, green: 0.70, blue: 1.00), "Cooling")
-                    legendSwatch(Color(red: 1.00, green: 0.55, blue: 0.25), "Heating")
-                    legendSwatch(Color(white: 0.6), "Fan/Dry")
+                    legend(lineColor, s.roomIsGovee ? "Room (Govee)" : "Room (AC sensor)", dashed: false)
+                    if !s.acLine.isEmpty { legend(Color.white.opacity(0.4), "AC sensor", dashed: false) }
+                    if !s.set.isEmpty { legend(.yellow, "Set", dashed: true) }
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -77,53 +110,60 @@ struct HistoryChart: View {
         }
     }
 
-    private func legendSwatch(_ c: Color, _ label: String) -> some View {
+    private func stat(_ label: String, _ v: Double) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(String(format: "%.1f%@", v, appliance.unitSymbol)).font(.subheadline.weight(.semibold)).monospacedDigit()
+        }
+    }
+
+    private func gridValues(_ s: Series) -> [Double] {
+        let span = s.hi - s.lo
+        let step: Double = span > 12 ? 4 : span > 6 ? 2 : 1
+        return stride(from: s.lo, through: s.hi, by: step).map { $0 }
+    }
+
+    private func grid(_ s: Series, _ size: CGSize) -> some View {
+        let m = TempMapper(start: s.start, end: s.end, lo: s.lo, hi: s.hi, size: size)
+        return Path { p in
+            for v in gridValues(s) {
+                let y = m.y(v)
+                p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: size.width, y: y))
+            }
+        }
+        .stroke(Color.white.opacity(0.07), style: StrokeStyle(lineWidth: 1, dash: [3, 4]))
+    }
+
+    private func yAxis(_ s: Series) -> some View {
+        GeometryReader { geo in
+            let m = TempMapper(start: s.start, end: s.end, lo: s.lo, hi: s.hi, size: geo.size)
+            ForEach(gridValues(s), id: \.self) { v in
+                Text("\(Int(v))°").font(.system(size: 10)).foregroundStyle(.secondary)
+                    .position(x: 12, y: m.y(v))
+            }
+        }
+        .frame(width: 26, height: 180)
+    }
+
+    private func xAxis(_ s: Series) -> some View {
+        let fmt: Date.FormatStyle = range > 86400 ? .dateTime.weekday(.abbreviated) : .dateTime.hour()
+        return HStack {
+            Text(s.start, format: fmt)
+            Spacer()
+            Text(s.start.addingTimeInterval(range / 2), format: fmt)
+            Spacer()
+            Text("Now")
+        }
+        .font(.system(size: 10))
+        .foregroundStyle(.secondary)
+    }
+
+    private func legend(_ c: Color, _ label: String, dashed: Bool) -> some View {
         HStack(spacing: 4) {
-            RoundedRectangle(cornerRadius: 2).fill(c.opacity(0.35)).frame(width: 12, height: 8)
+            Path { p in p.move(to: CGPoint(x: 0, y: 4)); p.addLine(to: CGPoint(x: 14, y: 4)) }
+                .stroke(c, style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: dashed ? [3, 2] : []))
+                .frame(width: 14, height: 8)
             Text(label)
         }
-    }
-
-    private func makePoints(_ samples: [History.Sample]) -> [Point] {
-        var out: [Point] = []
-        var seg = 0
-        var prev: Date?
-        for s in samples {
-            if let p = prev, s.t.timeIntervalSince(p) > 10 * 60 { seg += 1 }
-            prev = s.t
-            if let v = s.ac { out.append(Point(t: s.t, v: v, series: "AC sensor", segment: "ac\(seg)")) }
-            if let v = s.govee { out.append(Point(t: s.t, v: v, series: "Govee", segment: "gv\(seg)")) }
-            if let v = s.set { out.append(Point(t: s.t, v: v, series: "Set", segment: "set\(seg)")) }
-        }
-        return out
-    }
-
-    private struct Band: Identifiable {
-        let id = UUID()
-        let from: Date
-        let to: Date
-        let color: Color
-    }
-
-    /// Shaded background showing what the unit was doing.
-    private func modeBands(_ samples: [History.Sample]) -> [Band] {
-        var bands: [Band] = []
-        var i = 0
-        while i < samples.count {
-            let m = samples[i].mode
-            var j = i
-            while j + 1 < samples.count, samples[j + 1].mode == m,
-                  samples[j + 1].t.timeIntervalSince(samples[j].t) < 10 * 60 { j += 1 }
-            if let m {
-                let end = j + 1 < samples.count && samples[j + 1].t.timeIntervalSince(samples[j].t) < 10 * 60
-                    ? samples[j + 1].t : samples[j].t.addingTimeInterval(60)
-                let color: Color = m == ACMode.cool.rawValue ? Color(red: 0.30, green: 0.70, blue: 1.00)
-                    : m == ACMode.heat.rawValue ? Color(red: 1.00, green: 0.55, blue: 0.25)
-                    : Color(white: 0.6)
-                bands.append(Band(from: samples[i].t, to: end, color: color))
-            }
-            i = j + 1
-        }
-        return bands
     }
 }

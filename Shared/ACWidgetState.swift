@@ -11,6 +11,9 @@ struct ACWidgetState: Codable, Identifiable {
     var unit: String
     var mode: String
     var updatedAt: Date
+    var phase: String? = nil      // "cool" / "heat" / "other", nil when off
+    var online: Bool? = nil
+    var acSensor: Double? = nil
     static func load() -> [ACWidgetState] { AppGroup.read([ACWidgetState].self, "ac-widgets.json") ?? [] }
 }
 struct ACEntity: AppEntity {
