@@ -151,7 +151,7 @@ final class Store: ObservableObject {
 
     enum RoomSource { case govee, ac, none }
 
-    /// Room temperature Auto should act on, in the device's unit: the linked Govee when its
+    /// Room temperature Smart should act on, in the device's unit: the linked Govee when its
     /// reading is under 5 minutes old (and not switched off for this AC), otherwise the AC's own sensor.
     func roomTemp(_ a: Appliance) -> (value: Double?, source: RoomSource) {
         let g = Govee.shared
@@ -188,7 +188,7 @@ final class Store: ObservableObject {
         smart[id]?.turboMode = nil
     }
 
-    /// Switch band (degrees past the setpoint before Auto flips mode), in the device's current unit.
+    /// Switch band (degrees past the setpoint before Smart flips mode), in the device's current unit.
     func setBand(_ a: Appliance, _ b: Int) {
         guard var s = smart[a.id] else { return }
         let inSetpointUnit = s.fahrenheit == a.fahrenheit ? b
@@ -244,7 +244,7 @@ final class Store: ObservableObject {
         let boosted = smartAuto(a)?.startupTurbo == true
         disableSmartAuto(a.id)
         var p = [P.power: 1, P.mode: m.rawValue]
-        if boosted { p[P.turbo] = 0; p[P.fan] = FanSpeed.auto.rawValue }
+        if boosted { p[P.turbo] = 0 }
         if m.allowsTemperature, let t = a.targetTemp { p[P.target] = t }
         send(a.id, p)
     }
@@ -254,7 +254,7 @@ final class Store: ObservableObject {
         let boosted = smartAuto(a)?.startupTurbo == true
         disableSmartAuto(a.id)
         var p = [P.power: 1, P.mode: ACMode.auto.rawValue]
-        if boosted { p[P.turbo] = 0; p[P.fan] = FanSpeed.auto.rawValue }
+        if boosted { p[P.turbo] = 0 }
         send(a.id, p)
     }
 
@@ -367,7 +367,6 @@ final class Store: ObservableObject {
             } else {
                 if smartAuto(a)?.startupTurbo == true {
                     p[P.turbo] = 0
-                    p[P.fan] = FanSpeed.auto.rawValue
                 }
                 disableSmartAuto(a.id)
                 p[P.mode] = m.rawValue

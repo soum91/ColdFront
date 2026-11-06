@@ -472,7 +472,7 @@ struct GoveePickerView: View {
                 } header: {
                     Text("Nearby sensors")
                 } footer: {
-                    Text("The Govee broadcasts its readings, so no pairing is needed. If it doesn't show up, force-quit the Govee app: while it's connected, the sensor may stop broadcasting. It only updates while Equinox is open; in the background Auto falls back to the AC's own sensor.")
+                    Text("The Govee broadcasts its readings, so no pairing is needed. If it doesn't show up, force-quit the Govee app: while it's connected, the sensor may stop broadcasting. It only updates while Equinox is open; in the background Smart falls back to the AC's own sensor.")
                 }
 
                 let unparsed = govee.raw.values.filter { govee.readings[$0.id] == nil }.sorted { $0.rssi > $1.rssi }
@@ -494,14 +494,14 @@ struct GoveePickerView: View {
 
                 if linked != nil {
                     Section {
-                        Toggle("Auto uses AC sensor only", isOn: Binding(
+                        Toggle("Smart uses AC sensor only", isOn: Binding(
                             get: { govee.acOnly[appliance.id] == true },
                             set: { govee.acOnly[appliance.id] = $0 }))
                         Button("Unlink sensor", role: .destructive) {
                             govee.links[appliance.id] = nil
                         }
                     } footer: {
-                        Text("When on, the Govee is shown for comparison but Auto acts on the AC's reading.")
+                        Text("When on, the Govee is shown for comparison but Smart acts on the AC's reading.")
                     }
                 }
             }

@@ -14,6 +14,8 @@ The unit's own auto mode picks its own setpoint, so ColdFront's Auto replaces it
 
 On a fresh Smart Auto activation or power-on, if the room is at least 5°C (9°F) from the target in the cooling or heating direction, Equinox turns on the AC's actual Turbo switch when supported. At the setpoint it turns Turbo off and restores Auto fan speed. This is one boost per activation, not an ongoing oscillating rule. A paired Keystone runs the same rule independently of iOS background scheduling. Manually choosing a different fan speed or switching Turbo off cancels the app's temporary boost.
 
+**The boost belongs to the Smart button only.** The separate Auto button selects the AC's built-in Auto mode and never starts a Turbo boost. Switching away from Smart cancels an active boost without changing the native mode's fan setting.
+
 ## Build
 
 No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront-<version>-build-<N>.ipa` and publishes it as a GitHub Release with a changelog of what changed since the previous build (latest is always at the top of the Releases page). Sideload it with AltStore or Sideloadly.

@@ -44,7 +44,7 @@ import WidgetKit
             let boosted = store.smartAuto(a)?.startupTurbo == true
             store.disableSmartAuto(a.id)
             props = [P.power: 1, P.mode: action == .cool ? 2 : action == .fan ? 0 : 3]
-            if boosted { props[P.turbo] = 0; props[P.fan] = FanSpeed.auto.rawValue }
+            if boosted { props[P.turbo] = 0 }
             if action == .cool, let target = a.targetTemp { props[P.target] = target }
         case .sleep, .eco:
             let key = action == .sleep ? P.sleep : P.eco

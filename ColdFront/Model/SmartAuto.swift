@@ -61,7 +61,7 @@ struct SmartAuto: Codable, Equatable {
     }
 
     /// Work out what (if anything) to send. Returns the props plus the updated state to store.
-    /// `userAction` is true when the person just tapped Auto, changed the setpoint or powered on:
+    /// `userAction` is true when the person just tapped Smart, changed the setpoint or powered on:
     /// that bypasses the confirm/dwell timers, because they asked for it.
     func decide(for a: Appliance, room: Double?, userAction: Bool,
                 beginStartup: Bool = false, now: Date = Date()) -> (props: [String: Int], state: SmartAuto) {
@@ -117,7 +117,7 @@ struct SmartAuto: Codable, Equatable {
 
         let finalMode = props[P.mode].flatMap(ACMode.init(rawValue:)) ?? a.mode
 
-        // A single boost per Auto activation or power-on. Never rearm it merely because
+        // A single boost per Smart activation or power-on. Never rearm it merely because
         // the room warms up again during the same session. Turbo is an independent
         // ConnectLife switch (t_super), not a fan-speed enum value.
         if s.startupTurbo == false, let room {
