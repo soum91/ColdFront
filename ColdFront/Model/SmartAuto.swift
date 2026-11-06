@@ -21,6 +21,10 @@ struct SmartAuto: Codable, Equatable {
     /// Last command ColdFront sent, so it is never repeated.
     var lastSentMode: Int?
     var lastSentTarget: Int?
+    /// Nil = no startup boost, false = waiting for a usable room reading, true = Turbo is running.
+    /// Optional so previously saved Smart Auto settings still decode normally.
+    var startupTurbo: Bool?
+    var turboMode: Int?
 
     enum Phase: String { case cooling, heating, idle }
 
@@ -28,6 +32,8 @@ struct SmartAuto: Codable, Equatable {
     static let minDwell: TimeInterval = 30 * 60
     /// The room must stay out of band this long before a flip (filters sensor noise and door openings).
     static let confirmFor: TimeInterval = 5 * 60
+    /// Start with Turbo only when the room is at least this far from the setpoint.
+    static let turboStartDeltaC = 5.0
 
     static func defaultBand(fahrenheit: Bool) -> Int { fahrenheit ? 5 : 3 }
 
@@ -57,9 +63,19 @@ struct SmartAuto: Codable, Equatable {
     /// Work out what (if anything) to send. Returns the props plus the updated state to store.
     /// `userAction` is true when the person just tapped Auto, changed the setpoint or powered on:
     /// that bypasses the confirm/dwell timers, because they asked for it.
-    func decide(for a: Appliance, room: Double?, userAction: Bool, now: Date = Date()) -> (props: [String: Int], state: SmartAuto) {
+    func decide(for a: Appliance, room: Double?, userAction: Bool,
+                beginStartup: Bool = false, now: Date = Date()) -> (props: [String: Int], state: SmartAuto) {
         var s = self
-        guard enabled, a.online, a.isOn else { return ([:], s) }
+        guard enabled, a.online, a.isOn else {
+            s.startupTurbo = nil
+            s.turboMode = nil
+            return ([:], s)
+        }
+
+        if beginStartup {
+            s.startupTurbo = false
+            s.turboMode = nil
+        }
 
         let set = target(for: a)
         let band = band(for: a)
@@ -100,6 +116,33 @@ struct SmartAuto: Codable, Equatable {
         }
 
         let finalMode = props[P.mode].flatMap(ACMode.init(rawValue:)) ?? a.mode
+
+        // A single boost per Auto activation or power-on. Never rearm it merely because
+        // the room warms up again during the same session. Turbo is an independent
+        // ConnectLife switch (t_super), not a fan-speed enum value.
+        if s.startupTurbo == false, let room {
+            let gap = a.fahrenheit ? Self.turboStartDeltaC * 9 / 5 : Self.turboStartDeltaC
+            let needsCooling = finalMode == .cool && room - Double(set) >= gap
+            let needsHeating = finalMode == .heat && Double(set) - room >= gap
+            if a.has(P.turbo) && (needsCooling || needsHeating) {
+                props[P.turbo] = 1
+                s.startupTurbo = true
+                s.turboMode = finalMode.rawValue
+            } else {
+                s.startupTurbo = nil
+            }
+        }
+
+        if s.startupTurbo == true, let room {
+            let reached = s.turboMode == ACMode.cool.rawValue ? room <= Double(set) :
+                s.turboMode == ACMode.heat.rawValue ? room >= Double(set) : true
+            if reached || (s.turboMode != nil && s.turboMode != finalMode.rawValue) {
+                props[P.turbo] = 0
+                props[P.fan] = FanSpeed.auto.rawValue
+                s.startupTurbo = nil
+                s.turboMode = nil
+            }
+        }
 
         // Only send the setpoint when the mode changes or the person changed it, and never
         // the same value twice. Stops a mismatch in the reported value from spamming the unit.

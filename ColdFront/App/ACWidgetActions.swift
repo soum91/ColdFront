@@ -15,7 +15,15 @@ import WidgetKit
     }
     static func power(_ id: String, on: Bool) async throws {
         let a = try await device(id)
-        try await Store.shared.commit(a.id, [P.power: on ? 1 : 0])
+        let store = Store.shared
+        var props = [P.power: on ? 1 : 0]
+        if var smart = store.smartAuto(a) {
+            if !on && smart.startupTurbo == true { props[P.turbo] = 0 }
+            smart.startupTurbo = on ? false : nil
+            smart.turboMode = nil
+            store.smart[a.id] = smart
+        }
+        try await store.commit(a.id, props)
     }
     static func run(_ id: String, action: ACQuickAction) async throws {
         let a = try await device(id)
@@ -33,8 +41,10 @@ import WidgetKit
             }
             props = [P.target: next]
         case .cool, .fan, .dry:
+            let boosted = store.smartAuto(a)?.startupTurbo == true
             store.disableSmartAuto(a.id)
             props = [P.power: 1, P.mode: action == .cool ? 2 : action == .fan ? 0 : 3]
+            if boosted { props[P.turbo] = 0; props[P.fan] = FanSpeed.auto.rawValue }
             if action == .cool, let target = a.targetTemp { props[P.target] = target }
         case .sleep, .eco:
             let key = action == .sleep ? P.sleep : P.eco

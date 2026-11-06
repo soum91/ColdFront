@@ -179,11 +179,13 @@ final class Store: ObservableObject {
         smart[a.id] = SmartAuto(enabled: true, setpoint: seed, fahrenheit: a.fahrenheit, lastSwitch: nil, band: keepBand)
         var cur = a
         cur.status[P.power] = "1"
-        applySmart(cur, userAction: true, extra: a.isOn ? [:] : [P.power: 1])
+        applySmart(cur, userAction: true, beginStartup: true, extra: a.isOn ? [:] : [P.power: 1])
     }
 
     func disableSmartAuto(_ id: String) {
         smart[id]?.enabled = false
+        smart[id]?.startupTurbo = nil
+        smart[id]?.turboMode = nil
     }
 
     /// Switch band (degrees past the setpoint before Auto flips mode), in the device's current unit.
@@ -203,14 +205,16 @@ final class Store: ObservableObject {
         }
     }
 
-    private func applySmart(_ a: Appliance, userAction: Bool, extra: [String: Int] = [:]) {
+    private func applySmart(_ a: Appliance, userAction: Bool, beginStartup: Bool = false,
+                            extra: [String: Int] = [:]) {
         if bridgeOwnsAuto {
             // The bridge gets the new settings through pushSmartAutoToBridge; only power-on goes from here.
             if !extra.isEmpty { send(a.id, extra) }
             return
         }
         guard let st = smartAuto(a) else { return }
-        let (props, next) = st.decide(for: a, room: roomTemp(a).value, userAction: userAction)
+        let (props, next) = st.decide(for: a, room: roomTemp(a).value,
+                                      userAction: userAction, beginStartup: beginStartup)
         if next != st { smart[a.id] = next }
         let cmd = props.merging(extra) { $1 }
         if !cmd.isEmpty { send(a.id, cmd) }
@@ -222,10 +226,12 @@ final class Store: ObservableObject {
         if on, smartAuto(a) != nil {
             var cur = a
             cur.status[P.power] = "1"
-            applySmart(cur, userAction: true, extra: [P.power: 1])
+            applySmart(cur, userAction: true, beginStartup: true, extra: [P.power: 1])
             return
         }
         var p = [P.power: on ? 1 : 0]
+        if !on, smartAuto(a)?.startupTurbo == true { p[P.turbo] = 0 }
+        if !on { smart[a.id]?.startupTurbo = nil; smart[a.id]?.turboMode = nil }
         if on, a.mode.allowsTemperature, let t = a.targetTemp { p[P.target] = t }
         send(a.id, p)
     }
@@ -235,16 +241,21 @@ final class Store: ObservableObject {
             enableSmartAuto(a)
             return
         }
+        let boosted = smartAuto(a)?.startupTurbo == true
         disableSmartAuto(a.id)
         var p = [P.power: 1, P.mode: m.rawValue]
+        if boosted { p[P.turbo] = 0; p[P.fan] = FanSpeed.auto.rawValue }
         if m.allowsTemperature, let t = a.targetTemp { p[P.target] = t }
         send(a.id, p)
     }
 
     /// The unit's own auto mode (it picks its own setpoint): Smart Auto steps aside.
     func setUnitAuto(_ a: Appliance) {
+        let boosted = smartAuto(a)?.startupTurbo == true
         disableSmartAuto(a.id)
-        send(a.id, [P.power: 1, P.mode: ACMode.auto.rawValue])
+        var p = [P.power: 1, P.mode: ACMode.auto.rawValue]
+        if boosted { p[P.turbo] = 0; p[P.fan] = FanSpeed.auto.rawValue }
+        send(a.id, p)
     }
 
     func setTemp(_ a: Appliance, _ t: Int) {
@@ -259,9 +270,23 @@ final class Store: ObservableObject {
         send(a.id, [P.target: clamped])
     }
 
-    func setFan(_ a: Appliance, _ f: FanSpeed) { send(a.id, [P.fan: f.rawValue]) }
+    func setFan(_ a: Appliance, _ f: FanSpeed) {
+        var p = [P.fan: f.rawValue]
+        if smartAuto(a)?.startupTurbo == true {
+            p[P.turbo] = 0
+            smart[a.id]?.startupTurbo = nil
+            smart[a.id]?.turboMode = nil
+        }
+        send(a.id, p)
+    }
 
-    func toggle(_ a: Appliance, _ key: String) { send(a.id, [key: a.flag(key) ? 0 : 1]) }
+    func toggle(_ a: Appliance, _ key: String) {
+        if key == P.turbo {
+            smart[a.id]?.startupTurbo = nil
+            smart[a.id]?.turboMode = nil
+        }
+        send(a.id, [key: a.flag(key) ? 0 : 1])
+    }
 
     func setUnit(_ a: Appliance, fahrenheit: Bool) {
         guard fahrenheit != a.fahrenheit else { return }
@@ -323,8 +348,9 @@ final class Store: ObservableObject {
         var on = a
         on.status[P.power] = "1"
 
-        func runSmart(_ st: SmartAuto) {
-            let (props, next) = st.decide(for: on, room: roomTemp(a).value, userAction: true)
+        func runSmart(_ st: SmartAuto, beginStartup: Bool = false) {
+            let (props, next) = st.decide(for: on, room: roomTemp(a).value,
+                                          userAction: true, beginStartup: beginStartup)
             smart[a.id] = next
             p.merge(props) { $1 }
         }
@@ -335,8 +361,12 @@ final class Store: ObservableObject {
                                                  fahrenheit: a.fahrenheit, lastSwitch: nil)
                 st.enabled = true
                 if let temp { st.setpoint = temp; st.fahrenheit = a.fahrenheit }
-                runSmart(st)
+                runSmart(st, beginStartup: !a.isOn || smartAuto(a) == nil)
             } else {
+                if smartAuto(a)?.startupTurbo == true {
+                    p[P.turbo] = 0
+                    p[P.fan] = FanSpeed.auto.rawValue
+                }
                 disableSmartAuto(a.id)
                 p[P.mode] = m.rawValue
                 if m.allowsTemperature, let t = temp ?? a.targetTemp { p[P.target] = t }
@@ -348,7 +378,7 @@ final class Store: ObservableObject {
             p[P.target] = temp
         }
 
-        if let f = s.fan { p[P.fan] = f }
+        if let f = s.fan, p[P.turbo] != 1 { p[P.fan] = f }
         for (key, value) in [(P.sleep, s.sleep), (P.eco, s.eco), (P.dimmer, s.dimmer)] {
             if let v = value, a.has(key) { p[key] = v ? 1 : 0 }
         }
