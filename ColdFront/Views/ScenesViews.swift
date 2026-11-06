@@ -155,7 +155,8 @@ struct SceneEditor: View {
                 }
 
                 Section {
-                    SceneAutomationRows(automation: $scene.automation)
+                    SceneAutomationRows(automation: $scene.automation,
+                                        hasLocationTrigger: scene.onArrive == true || scene.onLeave == true)
                 } header: {
                     Text("Time, weather & temperature")
                 } footer: {
