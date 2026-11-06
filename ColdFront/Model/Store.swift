@@ -361,7 +361,9 @@ final class Store: ObservableObject {
                                                  fahrenheit: a.fahrenheit, lastSwitch: nil)
                 st.enabled = true
                 if let temp { st.setpoint = temp; st.fahrenheit = a.fahrenheit }
-                runSmart(st, beginStartup: !a.isOn || smartAuto(a) == nil)
+                // A paired Keystone owns Turbo timing. It detects this power-on or
+                // Auto activation itself, so don't send a duplicate startup boost.
+                runSmart(st, beginStartup: !bridgeOwnsAuto && (!a.isOn || smartAuto(a) == nil))
             } else {
                 if smartAuto(a)?.startupTurbo == true {
                     p[P.turbo] = 0
