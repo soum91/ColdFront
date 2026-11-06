@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.35",
+          "buildVersion": "35",
+          "date": "2026-11-06T03:47:32Z",
+          "localizedDescription": "- Allow clearing Home and choosing per-scene map geofences (4a5ca88)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-35/Equinox-1.7.0-build-35.ipa",
+          "size": 1280665,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.34",
           "buildVersion": "34",
           "date": "2026-11-05T16:08:05Z",
@@ -218,11 +227,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.34",
-      "versionDate": "2026-11-05T16:08:05Z",
-      "versionDescription": "- Home screen widget that actually renders, and an Exhale-style continuous temperature graph (2effc4c)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-34/Equinox-1.7.0-build-34.ipa",
-      "size": 1250219,
+      "version": "1.7.0.35",
+      "versionDate": "2026-11-06T03:47:32Z",
+      "versionDescription": "- Allow clearing Home and choosing per-scene map geofences (4a5ca88)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-35/Equinox-1.7.0-build-35.ipa",
+      "size": 1280665,
       "appPermissions": {}
     }
   ],
