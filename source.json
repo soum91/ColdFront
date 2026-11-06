@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.41",
+          "buildVersion": "41",
+          "date": "2026-11-06T18:58:16Z",
+          "localizedDescription": "- Room sensor picker (Govee or AC) that also sets the bridge, bridge's Govee reading as a source, Govee widget (a87dc8b)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-41/Equinox-1.7.0-build-41.ipa",
+          "size": 1381979,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.40",
           "buildVersion": "40",
           "date": "2026-11-06T15:30:37Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-15/Equinox-1.6.0-build-15.ipa",
           "size": 890845,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.5.0.14",
-          "buildVersion": "14",
-          "date": "2026-10-22T01:03:36Z",
-          "localizedDescription": "- Open straight onto the AC control page (no device list); scenes live on the page (4fa47a2)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-14/ColdFront-1.5.0-build-14.ipa",
-          "size": 591754,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.40",
-      "versionDate": "2026-11-06T15:30:37Z",
-      "versionDescription": "- Keep Turbo boost exclusive to Smart; preserve native Auto fan behavior (0288524)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-40/Equinox-1.7.0-build-40.ipa",
-      "size": 1336932,
+      "version": "1.7.0.41",
+      "versionDate": "2026-11-06T18:58:16Z",
+      "versionDescription": "- Room sensor picker (Govee or AC) that also sets the bridge, bridge's Govee reading as a source, Govee widget (a87dc8b)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-41/Equinox-1.7.0-build-41.ipa",
+      "size": 1381979,
       "appPermissions": {}
     }
   ],
