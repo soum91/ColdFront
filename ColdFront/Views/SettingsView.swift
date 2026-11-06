@@ -69,7 +69,7 @@ struct SettingsView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Section("Automations") {
-                    Text("Scenes show up as actions in the Shortcuts app (Run Scene, Turn On/Off AC, Set AC Temperature, Get Room Temperature). For schedules, open Shortcuts → Automation → New, pick Time of Day (or Arrive, Leave, Alarm, Focus), choose Run Immediately, and add an Equinox action. These run on time even when Equinox is closed. For conditions, use Get Room Temperature inside an If block.")
+                    Text("Long-press any scene to add a time, sunset, last-light, weather or temperature trigger, plus optional conditions. A paired Keystone bridge runs these rules even when the phone is closed. You can also use Equinox's Shortcuts actions for personal automations.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Home location") {

@@ -24,6 +24,7 @@ struct ACScene: Codable, Identifiable, Hashable {
     var onArrive: Bool?
     var onLeave: Bool?
     var triggerLocation: SceneLocation?
+    var automation: SceneAutomation?
 
     var acMode: ACMode? { mode.flatMap(ACMode.init(rawValue:)) }
 

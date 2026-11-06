@@ -170,7 +170,28 @@ extension Store {
             let b = Double(s.band ?? SmartAuto.defaultBand(fahrenheit: s.fahrenheit))
             auto = ["enabled": s.enabled, "setpoint": (setC * 2).rounded() / 2, "band": max(0.5, s.fahrenheit ? b * 5 / 9 : b)]
         }
+        let home = UserDefaults.standard.data(forKey: "geo.home").flatMap {
+            try? JSONDecoder().decode(SceneLocation.self, from: $0)
+        }
+        let scheduledScenes: [[String: Any]] = scenes.compactMap { scene in
+            guard let rule = scene.automation, rule.event != .none else { return nil }
+            var item = rule.bridgePayload(id: scene.id)
+            item["name"] = scene.name
+            var action: [String: Any] = ["power": scene.power]
+            if let mode = scene.mode { action["mode"] = mode }
+            if let temp = scene.temp {
+                action["tempC"] = scene.tempFahrenheit ? (Double(temp) - 32) * 5 / 9 : Double(temp)
+            }
+            if let fan = scene.fan { action["fan"] = fan }
+            if let sleep = scene.sleep { action["sleep"] = sleep }
+            if let eco = scene.eco { action["eco"] = eco }
+            if let dimmer = scene.dimmer { action["dimmer"] = dimmer }
+            item["ac"] = action
+            return item
+        }
         return (["utcOffset": TimeZone.current.secondsFromGMT(),
+                 "weather": home.map { ["lat": $0.lat, "lon": $0.lon] } ?? [:],
+                 "sceneRules": scheduledScenes,
                  "ac": ["user": creds.user, "pass": creds.pass, "puid": a.puid, "name": a.name,
                         "heat": a.heatSupported, "auto": auto]], nil)
     }

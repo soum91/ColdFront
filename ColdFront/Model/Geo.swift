@@ -24,6 +24,7 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
                 UserDefaults.standard.removeObject(forKey: "geo.home")
             }
             sync()
+            Store.shared.pushSmartAutoToBridge()
         }
     }
     @Published private(set) var auth: CLAuthorizationStatus
@@ -176,6 +177,11 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
             let store = Store.shared
             await store.refresh()
             for s in scenes {
+                let roomC = store.appliances.first(where: \.isAirConditioner).flatMap { ac -> Double? in
+                    guard let value = store.roomTemp(ac).value else { return nil }
+                    return ac.fahrenheit ? (value - 32) * 5 / 9 : value
+                }
+                guard await SceneConditions.evaluate(s.automation, indoorC: roomC) else { continue }
                 var ok = true
                 do { try await store.runScene(s) } catch { ok = false }
                 let what = arrive ? "Arrived at trigger location" : "Left trigger location"

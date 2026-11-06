@@ -25,6 +25,7 @@ final class Store: ObservableObject {
         didSet {
             ScenesStore.save(scenes)
             Geo.shared.sync()
+            pushSmartAutoToBridge()
         }
     }
 

@@ -151,7 +151,15 @@ struct SceneEditor: View {
                 } header: {
                     Text("Run automatically")
                 } footer: {
-                    Text("Choose Home or a location on the map for this scene. iOS geofencing requires Always location access for background triggers. For schedules, use Shortcuts → Automation → Time of Day → Equinox \"Run Scene\".")
+                    Text("Choose Home or a map location. Geofencing needs Always location access. Time, solar and weather rules run on a paired Keystone bridge; Shortcuts remains an alternative without a bridge.")
+                }
+
+                Section {
+                    SceneAutomationRows(automation: $scene.automation)
+                } header: {
+                    Text("Time, weather & temperature")
+                } footer: {
+                    Text("Keystone runs scheduled and environmental rules while the phone is closed. Room temperature uses the bridge's Govee sensor or AC reading; outdoor weather uses your Home location.")
                 }
 
                 if store.scenes.contains(where: { $0.id == scene.id }) {
