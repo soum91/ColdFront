@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.39",
+          "buildVersion": "39",
+          "date": "2026-11-06T06:55:27Z",
+          "localizedDescription": "- Let Keystone own the Smart Auto Turbo boost for bridge-controlled scenes (ec63792)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-39/Equinox-1.7.0-build-39.ipa",
+          "size": 1336868,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.38",
           "buildVersion": "38",
           "date": "2026-11-06T06:53:15Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-13/ColdFront-1.5.0-build-13.ipa",
           "size": 598841,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.5.0",
-          "buildVersion": "12",
-          "date": "2026-10-20T18:49:48Z",
-          "localizedDescription": "- CI: publish an AltStore-format source for FlareStore / AltStore / SideStore (4f699f3)\n- Backfill script: repair mis-tagged releases [skip ci] (b0023eb)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-12/ColdFront-1.5.0-build-12.ipa",
-          "size": 598747,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.38",
-      "versionDate": "2026-11-06T06:53:15Z",
-      "versionDescription": "- Smart Auto: one-shot Turbo boost above 5C gap, restore Auto fan at target (a77b2e0)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-38/Equinox-1.7.0-build-38.ipa",
-      "size": 1336815,
+      "version": "1.7.0.39",
+      "versionDate": "2026-11-06T06:55:27Z",
+      "versionDescription": "- Let Keystone own the Smart Auto Turbo boost for bridge-controlled scenes (ec63792)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-39/Equinox-1.7.0-build-39.ipa",
+      "size": 1336868,
       "appPermissions": {}
     }
   ],
