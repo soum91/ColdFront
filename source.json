@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.43",
+          "buildVersion": "43",
+          "date": "2026-11-06T20:38:25Z",
+          "localizedDescription": "- Enforce visible installed version/build across app releases (2f0b812)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-43/Equinox-1.7.0-build-43.ipa",
+          "size": 1384950,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.42",
           "buildVersion": "42",
           "date": "2026-11-06T20:16:27Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-17/Equinox-1.6.0-build-17.ipa",
           "size": 1070943,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.16",
-          "buildVersion": "16",
-          "date": "2026-10-25T13:22:00Z",
-          "localizedDescription": "- Add Equinox AC controls and room-temperature Lock Screen widgets (a3df0ab)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-16/Equinox-1.6.0-build-16.ipa",
-          "size": 1061710,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.42",
-      "versionDate": "2026-11-06T20:16:27Z",
-      "versionDescription": "- Show actual installed app version and build in UI (4a386ce)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-42/Equinox-1.7.0-build-42.ipa",
-      "size": 1385096,
+      "version": "1.7.0.43",
+      "versionDate": "2026-11-06T20:38:25Z",
+      "versionDescription": "- Enforce visible installed version/build across app releases (2f0b812)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-43/Equinox-1.7.0-build-43.ipa",
+      "size": 1384950,
       "appPermissions": {}
     }
   ],
