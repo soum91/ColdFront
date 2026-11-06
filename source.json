@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.36",
+          "buildVersion": "36",
+          "date": "2026-11-06T04:35:11Z",
+          "localizedDescription": "- Add scheduled AC scenes with sunset, weather and temperature conditions (e713450)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-36/Equinox-1.7.0-build-36.ipa",
+          "size": 1331164,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.35",
           "buildVersion": "35",
           "date": "2026-11-06T03:47:32Z",
@@ -227,11 +236,11 @@
           "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.35",
-      "versionDate": "2026-11-06T03:47:32Z",
-      "versionDescription": "- Allow clearing Home and choosing per-scene map geofences (4a5ca88)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-35/Equinox-1.7.0-build-35.ipa",
-      "size": 1280665,
+      "version": "1.7.0.36",
+      "versionDate": "2026-11-06T04:35:11Z",
+      "versionDescription": "- Add scheduled AC scenes with sunset, weather and temperature conditions (e713450)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-36/Equinox-1.7.0-build-36.ipa",
+      "size": 1331164,
       "appPermissions": {}
     }
   ],
