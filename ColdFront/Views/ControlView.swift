@@ -177,7 +177,8 @@ struct ControlView: View {
     private func roomStats(_ a: Appliance) -> some View {
         let src = store.roomTemp(a).source
         let autoOn = store.smartAuto(a) != nil
-        return HStack(spacing: 12) {
+        return VStack(spacing: 10) {
+        HStack(spacing: 12) {
             stat("AC sensor", a.indoorTemp.map { "\($0)\(a.unitSymbol)" } ?? "--", "air.conditioner.vertical",
                  active: autoOn && src == .ac)
             Button { showGovee = true } label: {
@@ -196,6 +197,21 @@ struct ControlView: View {
             if let w = a.int(P.watts), w > 0 {
                 stat("Power", "\(w) W", "bolt")
             }
+        }
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Room temperature for Smart").font(.caption).foregroundStyle(.secondary)
+            Picker("Room sensor", selection: Binding(
+                get: { govee.acOnly[a.id] == true ? 1 : 0 },
+                set: { v in
+                    govee.acOnly[a.id] = (v == 1)
+                    store.pushSmartAutoToBridge()
+                    store.publishWidgetState()
+                })) {
+                Text("Govee").tag(0)
+                Text("AC sensor").tag(1)
+            }
+            .pickerStyle(.segmented)
+        }
         }
     }
 

@@ -6,6 +6,7 @@ import AppIntents
     var body: some Widget {
         EquinoxHomeWidget()
         EquinoxTemperatureWidget()
+        EquinoxGoveeWidget()
         if #available(iOS 18.0, *) { EquinoxPowerControl(); EquinoxActionControl() }
     }
 }
@@ -397,5 +398,87 @@ struct EquinoxTemperatureView: View {
                 Label(configuration.action.rawValue.capitalized, systemImage: configuration.action.symbol)
             }
         }.displayName("AC action").description("Add separate temperature, mode, Sleep or Eco buttons.")
+    }
+}
+
+// MARK: - Govee sensor widget
+
+struct GoveeEntry: TimelineEntry {
+    var date: Date
+    var state: GoveeWidgetState?
+    var temp: String {
+        guard let s = state else { return "--" }
+        return String(format: "%.1f%@", s.fahrenheit ? s.tempC * 9 / 5 + 32 : s.tempC, s.fahrenheit ? "°F" : "°C")
+    }
+    /// The bridge's reading when it is newer than the one the app saved (the app can't listen in the background).
+    static func fresh() async -> GoveeEntry {
+        var st = GoveeWidgetState.load()
+        if let b = await GoveeFeed.fetchBridge(), b.at > (st?.at ?? .distantPast) { st = b }
+        return .init(date: .now, state: st)
+    }
+}
+
+struct GoveeProvider: TimelineProvider {
+    func placeholder(in context: Context) -> GoveeEntry {
+        .init(date: .now, state: GoveeWidgetState(name: "Govee", tempC: 21.5, humidity: 45, battery: 90, at: .now, fahrenheit: false))
+    }
+    func getSnapshot(in context: Context, completion: @escaping (GoveeEntry) -> Void) {
+        let s = GoveeWidgetState.load()
+        completion(s == nil ? placeholder(in: context) : .init(date: .now, state: s))
+    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<GoveeEntry>) -> Void) {
+        Task { completion(Timeline(entries: [await GoveeEntry.fresh()], policy: .after(.now.addingTimeInterval(600)))) }
+    }
+}
+
+struct EquinoxGoveeWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "EquinoxGovee", provider: GoveeProvider()) { entry in
+            GoveeWidgetView(entry: entry).containerBackground(for: .widget) { Color.clear }
+        }
+        .configurationDisplayName("Govee room sensor")
+        .description("Room temperature and humidity from your Govee, read from the Keystone Bridge so it stays current.")
+        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+    }
+}
+
+struct GoveeWidgetView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: GoveeEntry
+
+    var body: some View {
+        let s = entry.state
+        let hum = s.map { String(format: "%.0f%%", $0.humidity) } ?? "--"
+        switch family {
+        case .accessoryInline:
+            Text("\(entry.temp) · \(hum)")
+        case .accessoryCircular:
+            VStack(spacing: 1) {
+                Image(systemName: "thermometer.medium").font(.system(size: 16, weight: .semibold))
+                Text(entry.temp).font(.system(size: 11, weight: .bold)).lineLimit(1).minimumScaleFactor(0.65)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .accessoryRectangular:
+            HStack(spacing: 6) {
+                Image(systemName: "thermometer.medium")
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(s?.name.replacingOccurrences(of: " (bridge)", with: "") ?? "Govee").font(.caption2).lineLimit(1)
+                    Text("\(entry.temp) · \(hum)").font(.headline).lineLimit(1).minimumScaleFactor(0.7)
+                }
+            }
+        default:
+            VStack(alignment: .leading, spacing: 3) {
+                Label(s?.name.replacingOccurrences(of: " (bridge)", with: "") ?? "Govee", systemImage: "thermometer.medium")
+                    .font(.caption.bold()).lineLimit(1)
+                Text(entry.temp).font(.title.bold()).minimumScaleFactor(0.6)
+                Text("\(hum) humidity").font(.caption)
+                if let s {
+                    Text("Updated \(s.at, style: .relative) ago").font(.caption2).foregroundStyle(.secondary)
+                    if s.usedByAuto { Text("Used by Smart").font(.caption2).foregroundStyle(.secondary) }
+                } else {
+                    Text("Open Equinox once").font(.caption2)
+                }
+            }
+        }
     }
 }

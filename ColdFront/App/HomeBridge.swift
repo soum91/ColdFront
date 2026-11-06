@@ -170,6 +170,7 @@ extension Store {
             let b = Double(s.band ?? SmartAuto.defaultBand(fahrenheit: s.fahrenheit))
             auto = ["enabled": s.enabled, "setpoint": (setC * 2).rounded() / 2, "band": max(0.5, s.fahrenheit ? b * 5 / 9 : b)]
         }
+        auto["room"] = Govee.shared.acOnly[a.id] == true ? "ac" : "govee"
         let home = UserDefaults.standard.data(forKey: "geo.home").flatMap {
             try? JSONDecoder().decode(SceneLocation.self, from: $0)
         }
@@ -199,8 +200,13 @@ extension Store {
     /// The other way round: Smart Auto changed in Keystone (or on the bridge) shows up here too.
     func syncSmartAutoFromBridge() async {
         let l = HomeBridgeLink.stored
+        guard l.isSet, let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port) else { return }
+        AppGroup.write(BridgeHostFile(host: l.host, port: l.port), "bridge-host.json")
+        if let g = info["govee"] as? [String: Any], let p = GoveeFeed.parse(g) {
+            Govee.shared.setBridge(name: p.name, tempC: p.t, humidity: p.h, battery: p.b, at: p.at)
+            publishWidgetState()
+        }
         guard bridgeHasAC, let a = appliances.first(where: \.isAirConditioner),
-              let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port),
               let ac = info["ac"] as? [String: Any] else { return }
         if ac["ok"] as? Bool == true { HomeBridgeSync.acOKAt = Date() }
         // A change made here wins: don't read the bridge back until it has surely received it.
@@ -209,6 +215,7 @@ extension Store {
               let en = au["enabled"] as? Bool,
               let sp = (au["setpoint"] as? NSNumber)?.doubleValue,
               let band = (au["band"] as? NSNumber)?.doubleValue else { return }
+        if let src = au["source"] as? String { Govee.shared.acOnly[a.id] = (src == "ac") }
         var s = smart[a.id] ?? SmartAuto(enabled: false, setpoint: 21, fahrenheit: a.fahrenheit)
         let f = s.fahrenheit
         let spU = f ? Int((sp * 9 / 5 + 32).rounded()) : Int(sp.rounded())

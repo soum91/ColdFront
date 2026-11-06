@@ -65,6 +65,11 @@ extension Store {
         }
         if History.shared.log.isEmpty == false { History.shared.publishShared() }
         AppGroup.write(snaps, "ac-widgets.json")
+        if let ac = appliances.first(where: \.isAirConditioner), let r = Govee.shared.reading(for: ac.id) {
+            AppGroup.write(GoveeWidgetState(name: r.name, tempC: r.tempC, humidity: r.humidity, battery: r.battery, at: r.seen,
+                                            fahrenheit: ac.fahrenheit,
+                                            usedByAuto: Govee.shared.acOnly[ac.id] != true), "govee-widget.json")
+        }
         WidgetCenter.shared.reloadAllTimelines()
         if #available(iOS 18.0, *) { ControlCenter.shared.reloadAllControls() }
     }

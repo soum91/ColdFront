@@ -20,11 +20,15 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
         var battery: Int
         var rssi: Int
         var seen: Date
+        var maxAge: TimeInterval = 5 * 60
+        var viaBridge = false
 
-        var isFresh: Bool { Date().timeIntervalSince(seen) < 5 * 60 }
+        var isFresh: Bool { Date().timeIntervalSince(seen) < maxAge }
     }
 
     @Published private(set) var readings: [String: Reading] = [:]
+    /// What the Keystone Bridge hears from its Govee. The phone only hears the sensor with Equinox open; the bridge always does.
+    @Published var bridge: Reading?
     @Published private(set) var bluetoothOff = false
     /// applianceId -> sensor id
     @Published var links: [String: String] = UserDefaults.standard.dictionary(forKey: "govee.links") as? [String: String] ?? [:] {
@@ -53,8 +57,16 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
     }
 
     func reading(for applianceId: String) -> Reading? {
-        guard let id = links[applianceId] else { return nil }
-        return readings[id]
+        if let id = links[applianceId], let r = readings[id], r.isFresh { return r }
+        if let b = bridge, b.isFresh { return b }
+        if let id = links[applianceId] { return readings[id] }
+        return bridge
+    }
+
+    func setBridge(name: String, tempC: Double, humidity: Double, battery: Int, at: Date) {
+        bridge = Reading(id: "bridge", name: name.isEmpty ? "Govee (bridge)" : name.replacingOccurrences(of: "_", with: " ") + " (bridge)",
+                         tempC: tempC, humidity: humidity, battery: battery, rssi: 0, seen: at,
+                         maxAge: 15 * 60, viaBridge: true)
     }
 
     private func scan() {

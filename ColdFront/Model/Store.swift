@@ -97,6 +97,7 @@ final class Store: ObservableObject {
         guard let fresh = try? await client.appliances() else { return }
         appliances = fresh
         lastUpdated = Date()
+        await syncSmartAutoFromBridge()   // also brings in the bridge's Govee reading for the room temperature
         History.shared.record(self)
         defer { History.shared.save() }
         for a in fresh where !bridgeOwnsAuto {
