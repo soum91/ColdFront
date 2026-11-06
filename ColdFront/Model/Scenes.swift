@@ -1,5 +1,12 @@
 import Foundation
 
+/// An optional scene-specific geofence. Older scenes without this field continue to use Home.
+struct SceneLocation: Codable, Hashable {
+    var lat: Double
+    var lon: Double
+    var radius: Double
+}
+
 /// A saved bundle of settings applied in one command (one beep). Any nil field means "leave as is".
 /// `mode == ACMode.auto` means Equinox's Smart Auto, not the unit's native auto.
 struct ACScene: Codable, Identifiable, Hashable {
@@ -16,6 +23,7 @@ struct ACScene: Codable, Identifiable, Hashable {
     var dimmer: Bool?
     var onArrive: Bool?
     var onLeave: Bool?
+    var triggerLocation: SceneLocation?
 
     var acMode: ACMode? { mode.flatMap(ACMode.init(rawValue:)) }
 

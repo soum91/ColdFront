@@ -3,7 +3,7 @@ import CoreLocation
 import UIKit
 import UserNotifications
 
-/// Arrive/leave-home triggers for scenes, using iOS region monitoring. iOS wakes (or relaunches)
+/// Arrive/leave triggers for Home or scene-specific places, using iOS region monitoring. iOS wakes (or relaunches)
 /// Equinox in the background when you cross the boundary, even if the app was swiped away,
 /// as long as location access is set to Always.
 @MainActor
@@ -31,8 +31,10 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var lastEvent: String? = UserDefaults.standard.string(forKey: "geo.lastEvent")
 
     private let lm: CLLocationManager
-    private let regionID = "equinox.home"
+    private let homeRegionID = "equinox.home"
+    private let sceneRegionPrefix = "equinox.scene."
     private var pendingRadius: Double = 300
+    private var awaitingHomeLocation = false
 
     override init() {
         let manager = CLLocationManager()
@@ -64,10 +66,24 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func setHomeHere(radius: Double) {
         pendingRadius = radius
+        awaitingHomeLocation = true
         requestAccess()
         locating = true
         lm.desiredAccuracy = kCLLocationAccuracyBest
         lm.requestLocation()
+    }
+
+    func setHome(lat: Double, lon: Double, radius: Double) {
+        awaitingHomeLocation = false
+        guard CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: lat, longitude: lon)) else { return }
+        home = Home(lat: lat, lon: lon, radius: radius)
+    }
+
+    func clearHome() {
+        // Ignore a still-pending one-shot location request after clearing.
+        awaitingHomeLocation = false
+        locating = false
+        home = nil
     }
 
     func setRadius(_ r: Double) {
@@ -76,16 +92,35 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
         home = h
     }
 
-    /// Start or stop the geofence to match the saved home and the scenes that use it.
+    /// Sync the Home region plus one region per scene with a custom location.
+    /// iOS supports at most 20 monitored regions per app.
     func sync() {
-        for r in lm.monitoredRegions where r.identifier == regionID { lm.stopMonitoring(for: r) }
-        guard let home, anyTriggers, CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) else { return }
-        let region = CLCircularRegion(center: CLLocationCoordinate2D(latitude: home.lat, longitude: home.lon),
-                                      radius: min(home.radius, lm.maximumRegionMonitoringDistance),
-                                      identifier: regionID)
-        region.notifyOnEntry = true
-        region.notifyOnExit = true
-        lm.startMonitoring(for: region)
+        for region in lm.monitoredRegions where region.identifier == homeRegionID || region.identifier.hasPrefix(sceneRegionPrefix) {
+            lm.stopMonitoring(for: region)
+        }
+        guard CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) else { return }
+
+        let enabled = Store.shared.scenes.filter { $0.onArrive == true || $0.onLeave == true }
+        var places: [(String, Home)] = []
+        if let home, enabled.contains(where: { $0.triggerLocation == nil }) {
+            places.append((homeRegionID, home))
+        }
+        for scene in enabled {
+            guard let point = scene.triggerLocation else { continue }
+            places.append((sceneRegionPrefix + scene.id,
+                           Home(lat: point.lat, lon: point.lon, radius: point.radius)))
+        }
+
+        for (identifier, place) in places.prefix(20) {
+            let coordinate = CLLocationCoordinate2D(latitude: place.lat, longitude: place.lon)
+            guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
+            let maximum = lm.maximumRegionMonitoringDistance
+            let radius = maximum > 0 ? min(place.radius, maximum) : place.radius
+            let region = CLCircularRegion(center: coordinate, radius: max(100, radius), identifier: identifier)
+            region.notifyOnEntry = true
+            region.notifyOnExit = true
+            lm.startMonitoring(for: region)
+        }
     }
 
     // MARK: Delegate (CoreLocation calls back on the main thread, where the manager was made)
@@ -103,28 +138,35 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let l = locs.last else { return }
         MainActor.assumeIsolated {
             locating = false
+            guard awaitingHomeLocation else { return }
+            awaitingHomeLocation = false
             home = Home(lat: l.coordinate.latitude, lon: l.coordinate.longitude, radius: pendingRadius)
         }
     }
 
     nonisolated func locationManager(_ m: CLLocationManager, didFailWithError error: Error) {
-        MainActor.assumeIsolated { locating = false }
+        MainActor.assumeIsolated { locating = false; awaitingHomeLocation = false }
     }
 
     nonisolated func locationManager(_ m: CLLocationManager, didEnterRegion region: CLRegion) {
-        guard region.identifier == "equinox.home" else { return }
-        MainActor.assumeIsolated { fire(arrive: true) }
+        guard region.identifier == "equinox.home" || region.identifier.hasPrefix("equinox.scene.") else { return }
+        MainActor.assumeIsolated { fire(arrive: true, regionID: region.identifier) }
     }
 
     nonisolated func locationManager(_ m: CLLocationManager, didExitRegion region: CLRegion) {
-        guard region.identifier == "equinox.home" else { return }
-        MainActor.assumeIsolated { fire(arrive: false) }
+        guard region.identifier == "equinox.home" || region.identifier.hasPrefix("equinox.scene.") else { return }
+        MainActor.assumeIsolated { fire(arrive: false, regionID: region.identifier) }
     }
 
     // MARK: Running scenes
 
-    private func fire(arrive: Bool) {
-        let scenes = Store.shared.scenes.filter { arrive ? $0.onArrive == true : $0.onLeave == true }
+    private func fire(arrive: Bool, regionID: String) {
+        let scenes = Store.shared.scenes.filter { scene in
+            guard (arrive ? scene.onArrive : scene.onLeave) == true else { return false }
+            return scene.triggerLocation == nil
+                ? home != nil && regionID == homeRegionID
+                : regionID == sceneRegionPrefix + scene.id
+        }
         guard !scenes.isEmpty else { return }
         var bg = UIBackgroundTaskIdentifier.invalid
         bg = UIApplication.shared.beginBackgroundTask(withName: "geo-scene") {
@@ -136,7 +178,7 @@ final class Geo: NSObject, ObservableObject, CLLocationManagerDelegate {
             for s in scenes {
                 var ok = true
                 do { try await store.runScene(s) } catch { ok = false }
-                let what = arrive ? "Arrived home" : "Left home"
+                let what = arrive ? "Arrived at trigger location" : "Left trigger location"
                 note(ok ? "\(what): ran \(s.name)" : "\(what): \(s.name) failed (\(store.error ?? "network"))")
             }
             UIApplication.shared.endBackgroundTask(bg)
