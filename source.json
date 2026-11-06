@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.40",
+          "buildVersion": "40",
+          "date": "2026-11-06T15:30:37Z",
+          "localizedDescription": "- Keep Turbo boost exclusive to Smart; preserve native Auto fan behavior (0288524)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-40/Equinox-1.7.0-build-40.ipa",
+          "size": 1336932,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.39",
           "buildVersion": "39",
           "date": "2026-11-06T06:55:27Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-14/ColdFront-1.5.0-build-14.ipa",
           "size": 591754,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.5.0.13",
-          "buildVersion": "13",
-          "date": "2026-10-20T20:20:30Z",
-          "localizedDescription": "- CI: version string carries the build number (<version>.<build>) (48e78ee)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-13/ColdFront-1.5.0-build-13.ipa",
-          "size": 598841,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.39",
-      "versionDate": "2026-11-06T06:55:27Z",
-      "versionDescription": "- Let Keystone own the Smart Auto Turbo boost for bridge-controlled scenes (ec63792)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-39/Equinox-1.7.0-build-39.ipa",
-      "size": 1336868,
+      "version": "1.7.0.40",
+      "versionDate": "2026-11-06T15:30:37Z",
+      "versionDescription": "- Keep Turbo boost exclusive to Smart; preserve native Auto fan behavior (0288524)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-40/Equinox-1.7.0-build-40.ipa",
+      "size": 1336932,
       "appPermissions": {}
     }
   ],
