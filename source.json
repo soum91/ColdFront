@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.7.0.42",
+          "buildVersion": "42",
+          "date": "2026-11-06T20:16:27Z",
+          "localizedDescription": "- Show actual installed app version and build in UI (4a386ce)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-42/Equinox-1.7.0-build-42.ipa",
+          "size": 1385096,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.41",
           "buildVersion": "41",
           "date": "2026-11-06T18:58:16Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-16/Equinox-1.6.0-build-16.ipa",
           "size": 1061710,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.15",
-          "buildVersion": "15",
-          "date": "2026-10-22T02:00:56Z",
-          "localizedDescription": "- Subwave-style control page header, new Equinox icon, release and source renamed to Equinox (69614dc)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-15/Equinox-1.6.0-build-15.ipa",
-          "size": 890845,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.41",
-      "versionDate": "2026-11-06T18:58:16Z",
-      "versionDescription": "- Room sensor picker (Govee or AC) that also sets the bridge, bridge's Govee reading as a source, Govee widget (a87dc8b)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-41/Equinox-1.7.0-build-41.ipa",
-      "size": 1381979,
+      "version": "1.7.0.42",
+      "versionDate": "2026-11-06T20:16:27Z",
+      "versionDescription": "- Show actual installed app version and build in UI (4a386ce)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-42/Equinox-1.7.0-build-42.ipa",
+      "size": 1385096,
       "appPermissions": {}
     }
   ],
