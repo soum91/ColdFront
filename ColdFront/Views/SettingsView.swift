@@ -75,6 +75,9 @@ struct SettingsView: View {
                 Section("Home location") {
                     HomeLocationRows()
                 }
+                Section("About") {
+                    LabeledContent("Installed version", value: "\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown") (build \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"))")
+                }
                 Section {
                     Text("Equinox talks to the same cloud service as the official ConnectLife app. Devices are added and Wi-Fi provisioned in the official app; this app handles day-to-day control. Status refreshes every 20 seconds while the app is open.")
                         .font(.footnote).foregroundStyle(.secondary)
