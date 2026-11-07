@@ -315,7 +315,16 @@ struct ControlView: View {
             (P.swing, "Swing", "arrow.up.and.down"),
             (P.dimmer, "Dimmer", "lightbulb.min")
         ].filter { a.has($0.0) }
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+        let turboNote: String? = {
+            guard a.flag(P.turbo), a.isOn, store.smartAuto(a)?.startupTurbo != true,
+                  a.mode == .cool || a.mode == .heat, let t = store.displayedTarget(a) else { return nil }
+            let gap = Int(Store.turboStopGap(fahrenheit: a.fahrenheit))
+            let w = TurboGuardStore.watches[a.id]
+            let stopAt = w?.offset == 0 ? t : (a.mode == .cool ? t + gap : t - gap)
+            return "Turbo switches itself off at \(stopAt)\(a.unitSymbol)" + (w?.offset == 0 ? " (your set temp)." : ", \(gap)° short of your set temp.")
+        }()
+        return VStack(alignment: .leading, spacing: 8) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(items, id: \.0) { item in
                 let (key, label, icon) = item
                 let on = a.flag(key)
@@ -330,6 +339,10 @@ struct ControlView: View {
                     .foregroundStyle(on ? .black : .primary)
                 }
                 .buttonStyle(.plain)
+            }
+        }
+            if let turboNote {
+                Label(turboNote, systemImage: "hare").font(.caption).foregroundStyle(.secondary)
             }
         }
     }

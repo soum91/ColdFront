@@ -84,6 +84,7 @@ final class Store: ObservableObject {
             Task { await self.syncSmartAutoFromBridge() }
             error = nil
             runSmartAuto()
+            runTurboGuard()
             History.shared.record(self)
             publishWidgetState()
         } catch {
@@ -107,6 +108,10 @@ final class Store: ObservableObject {
             if !cmd.isEmpty {
                 try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init))
             }
+        }
+        for a in fresh {
+            let cmd = turboGuardCommand(a)
+            if !cmd.isEmpty { try? await client.set(puid: a.puid, properties: cmd.mapValues(String.init)) }
         }
         // Background refresh must publish the new room reading, too.
         publishWidgetState()
@@ -285,6 +290,7 @@ final class Store: ObservableObject {
         if key == P.turbo {
             smart[a.id]?.startupTurbo = nil
             smart[a.id]?.turboMode = nil
+            resetTurboGuard(a.id)
         }
         send(a.id, [key: a.flag(key) ? 0 : 1])
     }
