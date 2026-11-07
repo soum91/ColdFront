@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.8.0.44",
+          "buildVersion": "44",
+          "date": "2026-11-07T18:55:22Z",
+          "localizedDescription": "- Turbo auto-off: manual Turbo stops within 3°C of the set temperature (e7e7c3e)\n- ci: separate release tracks when deriving factual changes [skip ci] (a6edf04)\n- ci: reconcile bot-created releases with factual notes [skip ci] (fbb885e)\n- ci: verify and record actual release changes [skip ci] (59ee2fb)\n- docs: require evidence-based release changelog [skip ci] (2319899)\n- docs: initialize factual release changelog [skip ci] (2bbbb09)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-44/Equinox-1.8.0-build-44.ipa",
+          "size": 1397902,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.7.0.43",
           "buildVersion": "43",
           "date": "2026-11-06T20:38:25Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-18/Equinox-1.6.0-build-18.ipa",
           "size": 1071486,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.17",
-          "buildVersion": "17",
-          "date": "2026-10-25T18:04:22Z",
-          "localizedDescription": "- Add dedicated compact room-temperature Lock Screen widget (381633c)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-17/Equinox-1.6.0-build-17.ipa",
-          "size": 1070943,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.7.0.43",
-      "versionDate": "2026-11-06T20:38:25Z",
-      "versionDescription": "- Enforce visible installed version/build across app releases (2f0b812)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-43/Equinox-1.7.0-build-43.ipa",
-      "size": 1384950,
+      "version": "1.8.0.44",
+      "versionDate": "2026-11-07T18:55:22Z",
+      "versionDescription": "- Turbo auto-off: manual Turbo stops within 3°C of the set temperature (e7e7c3e)\n- ci: separate release tracks when deriving factual changes [skip ci] (a6edf04)\n- ci: reconcile bot-created releases with factual notes [skip ci] (fbb885e)\n- ci: verify and record actual release changes [skip ci] (59ee2fb)\n- docs: require evidence-based release changelog [skip ci] (2319899)\n- docs: initialize factual release changelog [skip ci] (2bbbb09)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-44/Equinox-1.8.0-build-44.ipa",
+      "size": 1397902,
       "appPermissions": {}
     }
   ],
