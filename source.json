@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.8.0.45",
+          "buildVersion": "45",
+          "date": "2026-11-10T08:06:43Z",
+          "localizedDescription": "- Enforce pseudonymous author metadata and owner privacy (099ba9d)\n- docs: require verified diagnostic exports [skip ci] (6a8183b)\n- docs: require verified diagnostic exports [skip ci] (43297e9)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (cbf7653)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (602261c)\n- docs: record factual changes for build-44 [skip ci] (35e8346)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-45/Equinox-1.8.0-build-45.ipa",
+          "size": 1398024,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.8.0.44",
           "buildVersion": "44",
           "date": "2026-11-07T18:55:22Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-19/Equinox-1.6.0-build-19.ipa",
           "size": 1071719,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.18",
-          "buildVersion": "18",
-          "date": "2026-10-25T22:49:45Z",
-          "localizedDescription": "- Publish refreshed room temperature to widgets after background poll (18ca3dc)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-18/Equinox-1.6.0-build-18.ipa",
-          "size": 1071486,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.8.0.44",
-      "versionDate": "2026-11-07T18:55:22Z",
-      "versionDescription": "- Turbo auto-off: manual Turbo stops within 3°C of the set temperature (e7e7c3e)\n- ci: separate release tracks when deriving factual changes [skip ci] (a6edf04)\n- ci: reconcile bot-created releases with factual notes [skip ci] (fbb885e)\n- ci: verify and record actual release changes [skip ci] (59ee2fb)\n- docs: require evidence-based release changelog [skip ci] (2319899)\n- docs: initialize factual release changelog [skip ci] (2bbbb09)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-44/Equinox-1.8.0-build-44.ipa",
-      "size": 1397902,
+      "version": "1.8.0.45",
+      "versionDate": "2026-11-10T08:06:43Z",
+      "versionDescription": "- Enforce pseudonymous author metadata and owner privacy (099ba9d)\n- docs: require verified diagnostic exports [skip ci] (6a8183b)\n- docs: require verified diagnostic exports [skip ci] (43297e9)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (cbf7653)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (602261c)\n- docs: record factual changes for build-44 [skip ci] (35e8346)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-45/Equinox-1.8.0-build-45.ipa",
+      "size": 1398024,
       "appPermissions": {}
     }
   ],
