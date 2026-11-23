@@ -154,8 +154,8 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
         guard !name.isEmpty, name.utf8.count < 32,
               (name.hasPrefix("GV") || name.hasPrefix("Govee")),
               name.utf8.allSatisfy({
-                  (48...57).contains($0) || (65...90).contains($0) ||
-                  (97...122).contains($0) || $0 == 95 || $0 == 45
+                  ($0 >= 48 && $0 <= 57) || ($0 >= 65 && $0 <= 90) ||
+                  ($0 >= 97 && $0 <= 122) || $0 == 95 || $0 == 45
               }) else { return }
         let now = Date()
         let age = now.timeIntervalSince(reading.seen)
