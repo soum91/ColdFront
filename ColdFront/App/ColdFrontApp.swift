@@ -67,8 +67,10 @@ struct RootView: View {
             }
         }
         .task {
-            if store.loggedIn { store.startPolling() }
-            if !Govee.shared.links.isEmpty || HomeBridgeLink.stored.isSet { Govee.shared.start() }
+            if store.loggedIn {
+                store.startPolling()
+                if !Govee.shared.links.isEmpty || HomeBridgeLink.stored.isSet { Govee.shared.start() }
+            }
         }
     }
 }
