@@ -1,5 +1,6 @@
 import Foundation
 import CoreBluetooth
+import Network
 
 /// Passive listener for Govee thermo-hygrometers (H5102 and its siblings).
 /// They broadcast temperature, humidity and battery in their advertisement,
@@ -41,6 +42,10 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
 
     private var central: CBCentralManager?
     private var wantScan = false
+    // Retain UDP connections until the send completes (a one-shot local Govee feed).
+    private var pendingBridgeFeeds: [UUID: NWConnection] = [:]
+    private var lastBridgeFeed = Date.distantPast
+    private var bridgeFeedSequence: UInt32 = 0
 
     func start() {
         wantScan = true
@@ -132,8 +137,63 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
         if let old = readings[id], old.tempC == temp, old.humidity == hum,
            Date().timeIntervalSince(old.seen) < 15 { return }   // throttle UI churn
         let display = name.isEmpty ? "Govee sensor" : name.replacingOccurrences(of: "_", with: " ")
-        readings[id] = Reading(id: id, name: display, tempC: temp, humidity: hum,
-                               battery: Int(v4[3] & 0x7F), rssi: rssi.intValue, seen: Date())
+        let reading = Reading(id: id, name: display, tempC: temp, humidity: hum,
+                              battery: Int(v4[3] & 0x7F), rssi: rssi.intValue, seen: Date())
+        readings[id] = reading
+        forwardToKeystone(reading, advertisedName: name)
+    }
+
+    // MARK: Keystone feed
+    // Equinox already receives this BLE observation for AC control; forward the same
+    // measurement rather than opening another Govee connection. iOS cannot guarantee
+    // background BLE delivery, so DewPoint / the bridge's BLE scanner remain fallbacks.
+    private func forwardToKeystone(_ reading: Reading, advertisedName name: String) {
+        guard links.values.contains(reading.id) else { return } // never send a neighbour's sensor
+        let bridge = HomeBridgeLink.stored
+        guard bridge.isSet, !bridge.host.isEmpty else { return }
+        guard !name.isEmpty, name.utf8.count < 32,
+              (name.hasPrefix("GV") || name.hasPrefix("Govee")),
+              name.utf8.allSatisfy({
+                  (48...57).contains($0) || (65...90).contains($0) ||
+                  (97...122).contains($0) || $0 == 95 || $0 == 45
+              }) else { return }
+        let now = Date()
+        let age = now.timeIntervalSince(reading.seen)
+        guard (0...120).contains(age), (-40...100).contains(reading.tempC),
+              (0...100).contains(reading.humidity), (0...100).contains(reading.battery),
+              now.timeIntervalSince(lastBridgeFeed) >= 12 else { return }
+        guard let port = NWEndpoint.Port(rawValue: 8092) else { return }
+        bridgeFeedSequence &+= 1
+        // EQG2 uses the DPG2 seven-field wire format, with explicit source identity.
+        let packet = String(format: "EQG2,%@,%.2f,%.2f,%d,%u,%u",
+                            name, reading.tempC, reading.humidity, reading.battery,
+                            UInt32(age * 1000), bridgeFeedSequence)
+        guard let data = packet.data(using: .utf8) else { return }
+        lastBridgeFeed = now
+
+        let params = NWParameters.udp
+        params.requiredInterfaceType = .wifi // never route local sensor data over cellular
+        let connection = NWConnection(host: NWEndpoint.Host(bridge.host), port: port, using: params)
+        let id = UUID()
+        pendingBridgeFeeds[id] = connection
+        connection.stateUpdateHandler = { [weak self, weak connection] state in
+            switch state {
+            case .ready:
+                connection?.send(content: data, completion: .contentProcessed { _ in
+                    connection?.cancel()
+                    DispatchQueue.main.async { self?.pendingBridgeFeeds[id] = nil }
+                })
+            case .failed, .cancelled:
+                connection?.cancel()
+                DispatchQueue.main.async { self?.pendingBridgeFeeds[id] = nil }
+            default:
+                break
+            }
+        }
+        connection.start(queue: DispatchQueue.global(qos: .utility))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
+            self?.pendingBridgeFeeds.removeValue(forKey: id)?.cancel()
+        }
     }
 
     // MARK: Debug: raw frames from anything Govee-looking, so unknown models can be mapped.
