@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.8.0.47",
+          "buildVersion": "47",
+          "date": "2026-11-23T16:52:56Z",
+          "localizedDescription": "- Document Equinox-to-Keystone primary Govee feed (5002ed2)\n- Feed selected Equinox Govee BLE readings to Keystone over local Wi-Fi (e8e2ab1)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-47/Equinox-1.8.0-build-47.ipa",
+          "size": 1406228,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.8.0.45",
           "buildVersion": "45",
           "date": "2026-11-10T08:06:43Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-20/Equinox-1.6.0-build-20.ipa",
           "size": 1074887,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.19",
-          "buildVersion": "19",
-          "date": "2026-10-25T22:49:57Z",
-          "localizedDescription": "- Use cached temperature readings in widget previews (efd42ff)\n- Publish refreshed room temperature to widgets after background poll (18ca3dc)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-19/Equinox-1.6.0-build-19.ipa",
-          "size": 1071719,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.8.0.45",
-      "versionDate": "2026-11-10T08:06:43Z",
-      "versionDescription": "- Enforce pseudonymous author metadata and owner privacy (099ba9d)\n- docs: require verified diagnostic exports [skip ci] (6a8183b)\n- docs: require verified diagnostic exports [skip ci] (43297e9)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (cbf7653)\n- docs: require verified diagnostics Copy, Share and Files export [skip ci] (602261c)\n- docs: record factual changes for build-44 [skip ci] (35e8346)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-45/Equinox-1.8.0-build-45.ipa",
-      "size": 1398024,
+      "version": "1.8.0.47",
+      "versionDate": "2026-11-23T16:52:56Z",
+      "versionDescription": "- Document Equinox-to-Keystone primary Govee feed (5002ed2)\n- Feed selected Equinox Govee BLE readings to Keystone over local Wi-Fi (e8e2ab1)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-47/Equinox-1.8.0-build-47.ipa",
+      "size": 1406228,
       "appPermissions": {}
     }
   ],
