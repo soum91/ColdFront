@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.8.0.48",
+          "buildVersion": "48",
+          "date": "2026-11-23T16:54:20Z",
+          "localizedDescription": "- Use explicit byte checks for Govee advertised name in Equinox feed (fe917d1)\n- Document Equinox-to-Keystone primary Govee feed (5002ed2)\n- Feed selected Equinox Govee BLE readings to Keystone over local Wi-Fi (e8e2ab1)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-48/Equinox-1.8.0-build-48.ipa",
+          "size": 1406306,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.8.0.47",
           "buildVersion": "47",
           "date": "2026-11-23T16:52:56Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-22/Equinox-1.6.0-build-22.ipa",
           "size": 1074746,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.20",
-          "buildVersion": "20",
-          "date": "2026-10-25T23:52:59Z",
-          "localizedDescription": "- Fix blank Equinox lock screen temperature and empty-state icon (76bfee7)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-20/Equinox-1.6.0-build-20.ipa",
-          "size": 1074887,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.8.0.47",
-      "versionDate": "2026-11-23T16:52:56Z",
-      "versionDescription": "- Document Equinox-to-Keystone primary Govee feed (5002ed2)\n- Feed selected Equinox Govee BLE readings to Keystone over local Wi-Fi (e8e2ab1)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-47/Equinox-1.8.0-build-47.ipa",
-      "size": 1406228,
+      "version": "1.8.0.48",
+      "versionDate": "2026-11-23T16:54:20Z",
+      "versionDescription": "- Use explicit byte checks for Govee advertised name in Equinox feed (fe917d1)\n- Document Equinox-to-Keystone primary Govee feed (5002ed2)\n- Feed selected Equinox Govee BLE readings to Keystone over local Wi-Fi (e8e2ab1)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-48/Equinox-1.8.0-build-48.ipa",
+      "size": 1406306,
       "appPermissions": {}
     }
   ],
