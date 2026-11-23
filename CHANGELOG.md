@@ -1,5 +1,13 @@
 # Changelog
 
+## [build-49] - 2026-11-23
+
+## Verified changes since build-48
+
+- Start Equinox Govee scanner when Keystone is paired even without local sensor link ([`67a029ba`](https://github.com/soum91/ColdFront/commit/67a029ba73326a6248a6afc53a2c0afb3a693c1a); `ColdFront/App/ColdFrontApp.swift`)
+
+[Inspect exact code changes](https://github.com/soum91/ColdFront/compare/build-48...build-49)
+
 ## [build-48] - 2026-11-23
 
 ## Verified changes since build-47
