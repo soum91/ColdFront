@@ -1,5 +1,13 @@
 # Changelog
 
+## [build-51] - 2026-11-23
+
+## Verified changes since build-50
+
+- Learn pinned Govee identity from Keystone even while the bridge reading is stale ([`777de906`](https://github.com/soum91/ColdFront/commit/777de906dd9efa5a58b8a8600a6a5ec3bb82065b); `ColdFront/App/HomeBridge.swift`)
+
+[Inspect exact code changes](https://github.com/soum91/ColdFront/compare/build-50...build-51)
+
 ## [build-52] - 2026-11-23
 
 ## Verified changes since build-50
