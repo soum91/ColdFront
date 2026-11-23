@@ -1,5 +1,13 @@
 # Changelog
 
+## [build-50] - 2026-11-23
+
+## Verified changes since build-49
+
+- Allow Equinox to forward Keystone's exact pinned Govee without a local BLE UUID link ([`45326250`](https://github.com/soum91/ColdFront/commit/45326250c765f47bb3f5a92ca397e2ce1464cf7d); `ColdFront/Model/Govee.swift`)
+
+[Inspect exact code changes](https://github.com/soum91/ColdFront/compare/build-49...build-50)
+
 ## [build-49] - 2026-11-23
 
 ## Verified changes since build-48
