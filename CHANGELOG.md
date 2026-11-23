@@ -1,5 +1,14 @@
 # Changelog
 
+## [build-52] - 2026-11-23
+
+## Verified changes since build-50
+
+- Only start paired bridge Govee monitoring after Equinox login ([`0ea75056`](https://github.com/soum91/ColdFront/commit/0ea750567fc15a3aa6d1c15decb3fedfa6fe0670); `ColdFront/App/ColdFrontApp.swift`)
+- Learn pinned Govee identity from Keystone even while the bridge reading is stale ([`777de906`](https://github.com/soum91/ColdFront/commit/777de906dd9efa5a58b8a8600a6a5ec3bb82065b); `ColdFront/App/HomeBridge.swift`)
+
+[Inspect exact code changes](https://github.com/soum91/ColdFront/compare/build-50...build-52)
+
 ## [build-50] - 2026-11-23
 
 ## Verified changes since build-49
