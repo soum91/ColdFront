@@ -16,6 +16,21 @@ On a fresh Smart Auto activation or power-on, if the room is at least 5°C (9°F
 
 **The boost belongs to the Smart button only.** The separate Auto button selects the AC's built-in Auto mode and never starts a Turbo boost. Switching away from Smart cancels an active boost without changing the native mode's fan setting.
 
+## Govee feed to Keystone
+
+When Equinox is paired with Keystone and an AC has a selected Govee sensor,
+Equinox forwards fresh Bluetooth advertisement measurements to that same
+Keystone bridge over Wi-Fi (UDP `8092`, packet type `EQG2`). This reuses
+Equinox's existing passive sensor scan; it does not create another Govee
+connection or change ConnectLife control. Keystone prefers this feed over
+DewPoint's `DPG2` backup, then falls back to its own BLE scanner. The Keystone
+Room card identifies the active source.
+
+The iPhone must be on the trusted home Wi-Fi and iOS must still be delivering
+Govee advertisements; **this is not a guaranteed 24/7 iOS background service**.
+Keystone continues to run Smart AC control and Apple Home independently of
+the phone. Never expose the unencrypted UDP sensor feed to the internet.
+
 ## Build
 
 No Xcode needed locally. Push to `main` (or run the workflow manually) and GitHub Actions builds an unsigned `ColdFront-<version>-build-<N>.ipa` and publishes it as a GitHub Release with a changelog of what changed since the previous build (latest is always at the top of the Releases page). Sideload it with AltStore or Sideloadly.
