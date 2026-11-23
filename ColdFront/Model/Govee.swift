@@ -42,6 +42,14 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
 
     private var central: CBCentralManager?
     private var wantScan = false
+    // Keystone reports the pinned sensor's advertised BLE name even when its
+    // current temperature reading is stale. This is safer than forwarding
+    // every nearby Govee and survives a changed iOS CoreBluetooth UUID.
+    private var bridgePinnedSensorName = ""
+
+    func setBridgePinnedSensor(name: String) {
+        bridgePinnedSensorName = name
+    }
     // Retain UDP connections until the send completes (a one-shot local Govee feed).
     private var pendingBridgeFeeds: [UUID: NWConnection] = [:]
     private var lastBridgeFeed = Date.distantPast
@@ -148,7 +156,13 @@ final class Govee: NSObject, ObservableObject, CBCentralManagerDelegate {
     // measurement rather than opening another Govee connection. iOS cannot guarantee
     // background BLE delivery, so DewPoint / the bridge's BLE scanner remain fallbacks.
     private func forwardToKeystone(_ reading: Reading, advertisedName name: String) {
-        guard links.values.contains(reading.id) else { return } // never send a neighbour's sensor
+        // A selected local link is normally enough, but an Equinox install may
+        // rely on Keystone's pinned Govee rather than storing a CoreBluetooth UUID.
+        // Match the exact advertised name from the paired bridge in that case.
+        let linked = links.values.contains(reading.id)
+        let pinned = !bridgePinnedSensorName.isEmpty &&
+                     name.caseInsensitiveCompare(bridgePinnedSensorName) == .orderedSame
+        guard linked || pinned else { return } // never send an unrelated nearby sensor
         let bridge = HomeBridgeLink.stored
         guard bridge.isSet, !bridge.host.isEmpty else { return }
         guard !name.isEmpty, name.utf8.count < 32,
