@@ -20,6 +20,15 @@
       "screenshotURLs": [],
       "versions": [
         {
+          "version": "1.8.0.52",
+          "buildVersion": "52",
+          "date": "2026-11-23T18:50:44Z",
+          "localizedDescription": "- Only start paired bridge Govee monitoring after Equinox login (0ea7505)\n- Learn pinned Govee identity from Keystone even while the bridge reading is stale (777de90)\n- Allow Equinox to forward Keystone's exact pinned Govee without a local BLE UUID link (4532625)\n- Start Equinox Govee scanner when Keystone is paired even without local sensor link (67a029b)\n- docs: record factual changes for build-48 [skip ci] (7ada2ab)\n- docs: record factual changes for build-47 [skip ci] (360b6b4)",
+          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-52/Equinox-1.8.0-build-52.ipa",
+          "size": 1406438,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "1.8.0.50",
           "buildVersion": "50",
           "date": "2026-11-23T18:50:09Z",
@@ -234,22 +243,13 @@
           "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-25/Equinox-1.6.0-build-25.ipa",
           "size": 1092964,
           "minOSVersion": "17.0"
-        },
-        {
-          "version": "1.6.0.24",
-          "buildVersion": "24",
-          "date": "2026-10-26T02:12:10Z",
-          "localizedDescription": "- Use minimal lockscreen temperature layout and explicit AC control artwork (7d3f15f)",
-          "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-24/Equinox-1.6.0-build-24.ipa",
-          "size": 1093029,
-          "minOSVersion": "17.0"
         }
       ],
-      "version": "1.8.0.50",
-      "versionDate": "2026-11-23T18:50:09Z",
-      "versionDescription": "- Allow Equinox to forward Keystone's exact pinned Govee without a local BLE UUID link (4532625)\n- Start Equinox Govee scanner when Keystone is paired even without local sensor link (67a029b)\n- docs: record factual changes for build-48 [skip ci] (7ada2ab)\n- docs: record factual changes for build-47 [skip ci] (360b6b4)",
-      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-50/Equinox-1.8.0-build-50.ipa",
-      "size": 1406425,
+      "version": "1.8.0.52",
+      "versionDate": "2026-11-23T18:50:44Z",
+      "versionDescription": "- Only start paired bridge Govee monitoring after Equinox login (0ea7505)\n- Learn pinned Govee identity from Keystone even while the bridge reading is stale (777de90)\n- Allow Equinox to forward Keystone's exact pinned Govee without a local BLE UUID link (4532625)\n- Start Equinox Govee scanner when Keystone is paired even without local sensor link (67a029b)\n- docs: record factual changes for build-48 [skip ci] (7ada2ab)\n- docs: record factual changes for build-47 [skip ci] (360b6b4)",
+      "downloadURL": "https://github.com/soum91/ColdFront/releases/download/build-52/Equinox-1.8.0-build-52.ipa",
+      "size": 1406438,
       "appPermissions": {}
     }
   ],
