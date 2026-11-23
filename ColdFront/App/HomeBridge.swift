@@ -202,9 +202,17 @@ extension Store {
         let l = HomeBridgeLink.stored
         guard l.isSet, let info = try? await HomeBridgeAPI.info(host: l.host, port: l.port) else { return }
         AppGroup.write(BridgeHostFile(host: l.host, port: l.port), "bridge-host.json")
-        if let g = info["govee"] as? [String: Any], let p = GoveeFeed.parse(g) {
-            Govee.shared.setBridge(name: p.name, tempC: p.t, humidity: p.h, battery: p.b, at: p.at)
-            publishWidgetState()
+        if let g = info["govee"] as? [String: Any] {
+            // Keep sensor identity even when Keystone has no fresh measurement.
+            // Equinox can then forward its own live BLE broadcasts for that
+            // specific Govee instead of waiting for a bridge reading.
+            if let name = g["name"] as? String {
+                Govee.shared.setBridgePinnedSensor(name: name)
+            }
+            if let p = GoveeFeed.parse(g) {
+                Govee.shared.setBridge(name: p.name, tempC: p.t, humidity: p.h, battery: p.b, at: p.at)
+                publishWidgetState()
+            }
         }
         guard bridgeHasAC, let a = appliances.first(where: \.isAirConditioner),
               let ac = info["ac"] as? [String: Any] else { return }
