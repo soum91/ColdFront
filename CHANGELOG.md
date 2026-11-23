@@ -1,5 +1,13 @@
 # Changelog
 
+## [build-48] - 2026-11-23
+
+## Verified changes since build-47
+
+- Use explicit byte checks for Govee advertised name in Equinox feed ([`fe917d1a`](https://github.com/soum91/ColdFront/commit/fe917d1a14e6abf9a391565578444127c6bef1ff); `ColdFront/Model/Govee.swift`)
+
+[Inspect exact code changes](https://github.com/soum91/ColdFront/compare/build-47...build-48)
+
 ## [build-47] - 2026-11-23
 
 ## Verified changes since build-45
