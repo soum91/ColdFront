@@ -48,7 +48,7 @@ struct RootView: View {
             guard store.loggedIn else { return }
             if p == .active {
                 store.startPolling()
-                if !Govee.shared.links.isEmpty { Govee.shared.start() }
+                if !Govee.shared.links.isEmpty || HomeBridgeLink.stored.isSet { Govee.shared.start() }
             } else {
                 store.stopPolling()
                 Govee.shared.stop()
@@ -58,11 +58,17 @@ struct RootView: View {
             }
         }
         .onChange(of: store.loggedIn) { _, on in
-            if on { store.startPolling() } else { store.stopPolling() }
+            if on {
+                store.startPolling()
+                if !Govee.shared.links.isEmpty || HomeBridgeLink.stored.isSet { Govee.shared.start() }
+            } else {
+                store.stopPolling()
+                Govee.shared.stop()
+            }
         }
         .task {
             if store.loggedIn { store.startPolling() }
-            if !Govee.shared.links.isEmpty { Govee.shared.start() }
+            if !Govee.shared.links.isEmpty || HomeBridgeLink.stored.isSet { Govee.shared.start() }
         }
     }
 }
